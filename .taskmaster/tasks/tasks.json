@@ -19,7 +19,7 @@
         "description": "Set up project structure, development environment, and core infrastructure for Bruno AI V3.1",
         "details": "Initialize Flutter project, set up FastAPI backend, configure PostgreSQL database with SQLAlchemy ORM, implement user authentication system, and establish GCP infrastructure with Cloud SQL, Storage, and Functions.",
         "testStrategy": "Verify successful project compilation, database connection, and basic API endpoints responding",
-        "status": "pending",
+        "status": "done",
         "dependencies": [],
         "priority": "high",
         "subtasks": [
@@ -86,7 +86,7 @@
               "1.1",
               "1.2"
             ],
-            "details": "Configure basic CI/CD workflows (e.g., GitHub Actions or Cloud Build) for linting, testing, and deployment triggers.",
+            "details": "Configure basic CI/CD workflows (e.g., GitHub Actions or Cloud Build) for linting, testing, and deployment triggers.\n<info added on 2025-07-23T12:08:29.431Z>\nCI/CD pipeline implementation is complete and fully tested. Three GitHub Actions workflows were created: backend.yml for Python/FastAPI with Poetry, Ruff linting, pytest coverage, and badge generation; frontend.yml for Flutter with separate jobs for testing, Android, and iOS builds, artifact collection, and code analysis; and deploy.yml for Cloud Run deployments supporting staging and production, Docker image builds, and environment-specific settings. All workflows use the latest GitHub Actions versions, proper secret management, and resource limits. Test branches validated the pipelines, over 469 linting issues were auto-fixed, and all backend and frontend checks now pass. Infrastructure updates include Dockerfile creation, artifact collection, and updated configuration files. The pipeline is now production-ready, automating linting, testing, building, and deployment for both backend and frontend.\n</info added on 2025-07-23T12:08:29.431Z>",
             "status": "done",
             "testStrategy": "Push code changes and verify that CI/CD pipelines execute and report status."
           },
@@ -99,7 +99,7 @@
               "1.5"
             ],
             "details": "Set up GCP API Gateway or equivalent, define routing rules, and connect to FastAPI backend services.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Send requests through the gateway and confirm correct routing and authentication enforcement."
           },
           {
@@ -112,7 +112,7 @@
               "1.7"
             ],
             "details": "Enable HTTPS, configure CORS policies, manage secrets securely, and audit initial endpoints for vulnerabilities.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Perform security checks on endpoints, verify HTTPS enforcement, and test CORS restrictions."
           }
         ]
@@ -990,7 +990,7 @@
     ],
     "metadata": {
       "created": "2025-07-22T19:15:49.929Z",
-      "updated": "2025-07-23T12:01:31.526Z",
+      "updated": "2025-07-23T12:08:40.636Z",
       "description": "Bruno AI V3.1 MVP feature set"
     }
   },
