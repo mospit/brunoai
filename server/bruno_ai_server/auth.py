@@ -3,19 +3,17 @@ Authentication utilities for Bruno AI Server.
 """
 
 from datetime import datetime, timedelta
-from typing import Optional, Union
 
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from .config import settings
 from .database import get_async_session
 from .models.user import User
-
 
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -40,7 +38,7 @@ def get_password_hash(password: str) -> str:
 
 
 def create_access_token(
-    data: dict, expires_delta: Optional[timedelta] = None
+    data: dict, expires_delta: timedelta | None = None
 ) -> str:
     """Create JWT access token."""
     to_encode = data.copy()
@@ -48,14 +46,14 @@ def create_access_token(
         expire = datetime.utcnow() + expires_delta
     else:
         expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    
+
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, settings.jwt_secret, algorithm=ALGORITHM)
     return encoded_jwt
 
 
 def create_refresh_token(
-    data: dict, expires_delta: Optional[timedelta] = None
+    data: dict, expires_delta: timedelta | None = None
 ) -> str:
     """Create JWT refresh token."""
     to_encode = data.copy()
@@ -63,13 +61,13 @@ def create_refresh_token(
         expire = datetime.utcnow() + expires_delta
     else:
         expire = datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
-    
+
     to_encode.update({"exp": expire, "type": "refresh"})
     encoded_jwt = jwt.encode(to_encode, settings.jwt_secret, algorithm=ALGORITHM)
     return encoded_jwt
 
 
-def verify_token(token: str) -> Optional[dict]:
+def verify_token(token: str) -> dict | None:
     """Verify and decode JWT token."""
     try:
         payload = jwt.decode(token, settings.jwt_secret, algorithms=[ALGORITHM])
@@ -78,7 +76,7 @@ def verify_token(token: str) -> Optional[dict]:
         return None
 
 
-async def get_user_by_email(db: AsyncSession, email: str) -> Optional[User]:
+async def get_user_by_email(db: AsyncSession, email: str) -> User | None:
     """Get user by email address."""
     result = await db.execute(select(User).where(User.email == email))
     return result.scalar_one_or_none()
@@ -86,7 +84,7 @@ async def get_user_by_email(db: AsyncSession, email: str) -> Optional[User]:
 
 async def authenticate_user(
     db: AsyncSession, email: str, password: str
-) -> Union[User, bool]:
+) -> User | bool:
     """Authenticate user with email and password."""
     user = await get_user_by_email(db, email)
     if not user:
@@ -106,26 +104,26 @@ async def get_current_user(
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    
+
     try:
         payload = verify_token(credentials.credentials)
         if payload is None:
             raise credentials_exception
-        
+
         user_id: int = payload.get("sub")
         if user_id is None:
             raise credentials_exception
-            
+
     except JWTError:
         raise credentials_exception
-    
+
     # Get user from database
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()
-    
+
     if user is None:
         raise credentials_exception
-    
+
     return user
 
 
@@ -148,29 +146,29 @@ async def get_user_from_refresh_token(
         detail="Invalid refresh token",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    
+
     try:
         payload = verify_token(token)
         if payload is None:
             raise credentials_exception
-        
+
         # Check if token is a refresh token
         token_type = payload.get("type")
         if token_type != "refresh":
             raise credentials_exception
-            
+
         user_id: int = payload.get("sub")
         if user_id is None:
             raise credentials_exception
-            
+
     except JWTError:
         raise credentials_exception
-    
+
     # Get user from database
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()
-    
+
     if user is None or not user.is_active:
         raise credentials_exception
-    
+
     return user

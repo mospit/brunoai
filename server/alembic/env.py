@@ -4,17 +4,14 @@ Alembic migrate environment configuration
 
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+from sqlalchemy import engine_from_config, pool
 
 from alembic import context
-
-from bruno_ai_server.models.base import Base
 from bruno_ai_server.config import settings
 
 # Ensures all models are imported
 from bruno_ai_server.models import *  # noqa: F401, F403
-
+from bruno_ai_server.models.base import Base
 
 # this is the Alembic Config object, which provides
 # the access to the values within the .ini file in use.

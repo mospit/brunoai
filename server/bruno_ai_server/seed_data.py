@@ -3,12 +3,13 @@ Seed data for Bruno AI database.
 """
 
 from sqlalchemy.orm import Session
+
 from .models.pantry import PantryCategory
 
 
 def seed_pantry_categories(db: Session):
     """Seed initial pantry categories."""
-    
+
     categories = [
         {
             "name": "Fruits",
@@ -17,7 +18,7 @@ def seed_pantry_categories(db: Session):
             "color": "#FF6B6B"
         },
         {
-            "name": "Vegetables", 
+            "name": "Vegetables",
             "description": "Fresh and frozen vegetables",
             "icon": "🥕",
             "color": "#4ECDC4"
@@ -94,7 +95,7 @@ def seed_pantry_categories(db: Session):
     for category_data in categories:
         category = PantryCategory(**category_data)
         db.add(category)
-    
+
     db.commit()
     print(f"Successfully seeded {len(categories)} pantry categories.")
 

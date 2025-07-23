@@ -5,32 +5,30 @@ Authentication API routes.
 import random
 import string
 from datetime import timedelta
-from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..auth import (
     authenticate_user,
     create_access_token,
     create_refresh_token,
     get_current_active_user,
-    get_current_user,
     get_password_hash,
     get_user_by_email,
     get_user_from_refresh_token,
 )
 from ..database import get_async_session
-from ..models.user import User, Household, HouseholdMember
+from ..models.user import Household, HouseholdMember, User
 from ..schemas import (
+    HouseholdCreate,
+    HouseholdResponse,
+    RefreshTokenRequest,
+    Token,
     UserCreate,
     UserLogin,
     UserResponse,
-    Token,
-    RefreshTokenRequest,
-    HouseholdCreate,
-    HouseholdResponse,
 )
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
@@ -54,7 +52,7 @@ async def register_user(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email already registered"
         )
-    
+
     # Create new user
     hashed_password = get_password_hash(user_data.password)
     db_user = User(
@@ -64,14 +62,14 @@ async def register_user(
         is_active=True,
         is_verified=False,
     )
-    
+
     db.add(db_user)
     await db.commit()
     await db.refresh(db_user)
-    
+
     # Create default household for the user
     invite_code = generate_invite_code()
-    
+
     # Ensure invite code is unique
     while True:
         result = await db.execute(
@@ -80,27 +78,27 @@ async def register_user(
         if not result.scalar_one_or_none():
             break
         invite_code = generate_invite_code()
-    
+
     household = Household(
         name=f"{db_user.full_name}'s Household",
         invite_code=invite_code,
         owner_id=db_user.id,
     )
-    
+
     db.add(household)
     await db.commit()
     await db.refresh(household)
-    
+
     # Add user as admin member of their household
     member = HouseholdMember(
         user_id=db_user.id,
         household_id=household.id,
         role="admin",
     )
-    
+
     db.add(member)
     await db.commit()
-    
+
     return db_user
 
 
@@ -117,27 +115,27 @@ async def login_user(
             detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     if not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Inactive user"
         )
-    
+
     # Create 15-minute access token
     access_token_expires = timedelta(minutes=15)
     access_token = create_access_token(
         data={"sub": str(user.id)}, expires_delta=access_token_expires
     )
-    
+
     # Create 7-day refresh token
     refresh_token_expires = timedelta(days=7)
     refresh_token = create_refresh_token(
         data={"sub": str(user.id)}, expires_delta=refresh_token_expires
     )
-    
+
     return {
-        "access_token": access_token, 
+        "access_token": access_token,
         "refresh_token": refresh_token,
         "token_type": "bearer"
     }
@@ -151,13 +149,13 @@ async def refresh_access_token(
     """Refresh access token using refresh token."""
     # Verify refresh token and get user
     user = await get_user_from_refresh_token(token_data.refresh_token, db)
-    
+
     # Create new 15-minute access token
     access_token_expires = timedelta(minutes=15)
     access_token = create_access_token(
         data={"sub": str(user.id)}, expires_delta=access_token_expires
     )
-    
+
     return {
         "access_token": access_token,
         "token_type": "bearer"
@@ -196,7 +194,7 @@ async def create_household(
     """Create a new household."""
     # Generate unique invite code
     invite_code = generate_invite_code()
-    
+
     while True:
         result = await db.execute(
             select(Household).where(Household.invite_code == invite_code)
@@ -204,28 +202,28 @@ async def create_household(
         if not result.scalar_one_or_none():
             break
         invite_code = generate_invite_code()
-    
+
     # Create household
     household = Household(
         name=household_data.name,
         invite_code=invite_code,
         owner_id=current_user.id,
     )
-    
+
     db.add(household)
     await db.commit()
     await db.refresh(household)
-    
+
     # Add user as admin member
     member = HouseholdMember(
         user_id=current_user.id,
         household_id=household.id,
         role="admin",
     )
-    
+
     db.add(member)
     await db.commit()
-    
+
     return household
 
 
@@ -241,13 +239,13 @@ async def join_household(
         select(Household).where(Household.invite_code == invite_code)
     )
     household = result.scalar_one_or_none()
-    
+
     if not household:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Invalid invite code"
         )
-    
+
     # Check if user is already a member
     result = await db.execute(
         select(HouseholdMember).where(
@@ -256,21 +254,21 @@ async def join_household(
         )
     )
     existing_member = result.scalar_one_or_none()
-    
+
     if existing_member:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Already a member of this household"
         )
-    
+
     # Add user as member
     member = HouseholdMember(
         user_id=current_user.id,
         household_id=household.id,
         role="member",
     )
-    
+
     db.add(member)
     await db.commit()
-    
+
     return household

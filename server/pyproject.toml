@@ -66,6 +66,10 @@ use_parentheses = true
 ensure_newline_before_comments = true
 
 [tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
 select = [
     "E",  # pycodestyle errors
     "W",  # pycodestyle warnings
@@ -79,12 +83,16 @@ ignore = [
     "E501",  # line too long, handled by black
     "B008",  # do not perform function calls in argument defaults
     "C901",  # too complex
+    "B904",  # raise from None
+    "E402",  # module level import not at top
+    "F841",  # local variable assigned but never used
 ]
-line-length = 88
-target-version = "py312"
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
+"test_*.py" = ["E402", "F841"]
+"tests/*.py" = ["E402", "F841"]
+"alembic/versions/*.py" = ["W291"]
 
 [tool.flake8]
 max-line-length = 88

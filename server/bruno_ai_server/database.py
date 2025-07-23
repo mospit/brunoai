@@ -3,11 +3,11 @@ Database connection and session management.
 """
 
 from sqlalchemy import create_engine
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import sessionmaker
+
 from .config import settings
 from .models import Base
-
 
 # Create async engine for async operations
 async_engine = create_async_engine(

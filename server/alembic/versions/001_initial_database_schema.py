@@ -5,9 +5,10 @@ Revises:
 Create Date: 2025-01-23 04:10:00.000000
 
 """
-from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
+
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = '001'
@@ -30,7 +31,7 @@ def upgrade() -> None:
     sa.UniqueConstraint('name')
     )
     op.create_index(op.f('ix_pantry_categories_id'), 'pantry_categories', ['id'], unique=False)
-    
+
     op.create_table('recipes',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
@@ -50,7 +51,7 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_recipes_id'), 'recipes', ['id'], unique=False)
-    
+
     op.create_table('users',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
@@ -68,7 +69,7 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_users_email'), 'users', ['email'], unique=True)
     op.create_index(op.f('ix_users_id'), 'users', ['id'], unique=False)
-    
+
     op.create_table('households',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
@@ -83,7 +84,7 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_households_id'), 'households', ['id'], unique=False)
     op.create_index(op.f('ix_households_invite_code'), 'households', ['invite_code'], unique=True)
-    
+
     op.create_table('household_members',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
@@ -98,7 +99,7 @@ def upgrade() -> None:
     sa.UniqueConstraint('user_id', 'household_id', name='unique_user_household')
     )
     op.create_index(op.f('ix_household_members_id'), 'household_members', ['id'], unique=False)
-    
+
     op.create_table('pantry_items',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
@@ -122,7 +123,7 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_pantry_items_barcode'), 'pantry_items', ['barcode'], unique=False)
     op.create_index(op.f('ix_pantry_items_id'), 'pantry_items', ['id'], unique=False)
-    
+
     op.create_table('recipe_ingredients',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
@@ -137,7 +138,7 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_recipe_ingredients_id'), 'recipe_ingredients', ['id'], unique=False)
-    
+
     op.create_table('shopping_lists',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
@@ -154,7 +155,7 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_shopping_lists_id'), 'shopping_lists', ['id'], unique=False)
-    
+
     op.create_table('user_favorites',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
@@ -169,7 +170,7 @@ def upgrade() -> None:
     sa.UniqueConstraint('user_id', 'recipe_id', name='unique_user_recipe_favorite')
     )
     op.create_index(op.f('ix_user_favorites_id'), 'user_favorites', ['id'], unique=False)
-    
+
     op.create_table('orders',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
@@ -198,7 +199,7 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_orders_external_order_id'), 'orders', ['external_order_id'], unique=True)
     op.create_index(op.f('ix_orders_id'), 'orders', ['id'], unique=False)
-    
+
     op.create_table('shopping_list_items',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
@@ -220,7 +221,7 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_shopping_list_items_id'), 'shopping_list_items', ['id'], unique=False)
-    
+
     op.create_table('order_items',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),

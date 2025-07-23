@@ -2,8 +2,9 @@
 Pydantic schemas for API request/response models.
 """
 
-from datetime import datetime, date
-from typing import Optional, Dict, Any
+from datetime import date, datetime
+from typing import Any
+
 from pydantic import BaseModel, EmailStr, validator
 
 
@@ -17,7 +18,7 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     """Schema for user creation."""
     password: str
-    
+
     @validator('password')
     def validate_password(cls, v):
         if len(v) < 8:
@@ -36,11 +37,11 @@ class UserResponse(UserBase):
     id: int
     is_active: bool
     is_verified: bool
-    dietary_preferences: Dict[str, Any] = {}
-    voice_settings: Dict[str, Any] = {}
-    notification_preferences: Dict[str, Any] = {}
+    dietary_preferences: dict[str, Any] = {}
+    voice_settings: dict[str, Any] = {}
+    notification_preferences: dict[str, Any] = {}
     created_at: datetime
-    
+
     class Config:
         from_attributes = True
 
@@ -48,13 +49,13 @@ class UserResponse(UserBase):
 class Token(BaseModel):
     """Schema for JWT token response."""
     access_token: str
-    refresh_token: Optional[str] = None
+    refresh_token: str | None = None
     token_type: str = "bearer"
 
 
 class TokenData(BaseModel):
     """Schema for token data."""
-    user_id: Optional[int] = None
+    user_id: int | None = None
 
 
 class RefreshTokenRequest(BaseModel):
@@ -78,9 +79,9 @@ class HouseholdResponse(HouseholdBase):
     id: int
     invite_code: str
     owner_id: int
-    settings: Dict[str, Any] = {}
+    settings: dict[str, Any] = {}
     created_at: datetime
-    
+
     class Config:
         from_attributes = True
 
@@ -93,7 +94,7 @@ class HouseholdMemberResponse(BaseModel):
     role: str
     joined_at: datetime
     user: UserResponse
-    
+
     class Config:
         from_attributes = True
 
@@ -103,10 +104,10 @@ class PantryCategoryResponse(BaseModel):
     """Schema for pantry category response."""
     id: int
     name: str
-    description: Optional[str] = None
-    icon: Optional[str] = None
-    color: Optional[str] = None
-    
+    description: str | None = None
+    icon: str | None = None
+    color: str | None = None
+
     class Config:
         from_attributes = True
 
@@ -116,44 +117,44 @@ class PantryItemBase(BaseModel):
     name: str
     quantity: float = 1.0
     unit: str = "piece"
-    location: Optional[str] = None
-    notes: Optional[str] = None
+    location: str | None = None
+    notes: str | None = None
 
 
 class PantryItemCreate(PantryItemBase):
     """Schema for pantry item creation."""
-    barcode: Optional[str] = None
-    expiration_date: Optional[date] = None
-    category_id: Optional[int] = None
+    barcode: str | None = None
+    expiration_date: date | None = None
+    category_id: int | None = None
 
 
 class PantryItemUpdate(BaseModel):
     """Schema for pantry item update."""
-    name: Optional[str] = None
-    quantity: Optional[float] = None
-    unit: Optional[str] = None
-    location: Optional[str] = None
-    notes: Optional[str] = None
-    expiration_date: Optional[date] = None
-    category_id: Optional[int] = None
+    name: str | None = None
+    quantity: float | None = None
+    unit: str | None = None
+    location: str | None = None
+    notes: str | None = None
+    expiration_date: date | None = None
+    category_id: int | None = None
 
 
 class PantryItemResponse(PantryItemBase):
     """Schema for pantry item response."""
     id: int
-    barcode: Optional[str] = None
-    expiration_date: Optional[date] = None
-    purchase_date: Optional[date] = None
+    barcode: str | None = None
+    expiration_date: date | None = None
+    purchase_date: date | None = None
     household_id: int
-    category_id: Optional[int] = None
+    category_id: int | None = None
     added_by_user_id: int
-    item_metadata: Dict[str, Any] = {}
+    item_metadata: dict[str, Any] = {}
     created_at: datetime
-    
+
     # Relationships
-    category: Optional[PantryCategoryResponse] = None
+    category: PantryCategoryResponse | None = None
     added_by_user: UserResponse
-    
+
     class Config:
         from_attributes = True
 
@@ -162,33 +163,33 @@ class PantryItemResponse(PantryItemBase):
 class RecipeBase(BaseModel):
     """Base recipe schema."""
     title: str
-    description: Optional[str] = None
+    description: str | None = None
     instructions: str
 
 
 class RecipeCreate(RecipeBase):
     """Schema for recipe creation."""
-    prep_time_minutes: Optional[int] = None
-    cook_time_minutes: Optional[int] = None
+    prep_time_minutes: int | None = None
+    cook_time_minutes: int | None = None
     servings: int = 4
-    difficulty_level: Optional[str] = None
+    difficulty_level: str | None = None
     tags: list = []
-    cuisine_type: Optional[str] = None
+    cuisine_type: str | None = None
 
 
 class RecipeResponse(RecipeBase):
     """Schema for recipe response."""
     id: int
-    prep_time_minutes: Optional[int] = None
-    cook_time_minutes: Optional[int] = None
+    prep_time_minutes: int | None = None
+    cook_time_minutes: int | None = None
     servings: int
-    difficulty_level: Optional[str] = None
-    nutrition_info: Dict[str, Any] = {}
+    difficulty_level: str | None = None
+    nutrition_info: dict[str, Any] = {}
     tags: list = []
-    cuisine_type: Optional[str] = None
-    external_source: Optional[str] = None
-    external_id: Optional[str] = None
+    cuisine_type: str | None = None
+    external_source: str | None = None
+    external_id: str | None = None
     created_at: datetime
-    
+
     class Config:
         from_attributes = True

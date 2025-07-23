@@ -2,23 +2,23 @@
 Pantry router for handling pantry items.
 """
 
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
-from typing import Optional
 
 from ..auth import get_current_active_user
 from ..database import get_async_session
-from ..models.pantry import PantryItem, PantryCategory
-from ..models.user import User, HouseholdMember
-from ..schemas import PantryItemCreate, PantryItemUpdate, PantryItemResponse
+from ..models.pantry import PantryCategory, PantryItem
+from ..models.user import HouseholdMember, User
+from ..schemas import PantryItemCreate, PantryItemResponse, PantryItemUpdate
 
 # Define the router
 router = APIRouter(prefix="/pantry/items", tags=["pantry"])
 
 
-async def get_user_household_id(user: User, db: AsyncSession) -> Optional[int]:
+async def get_user_household_id(user: User, db: AsyncSession) -> int | None:
     """Get the user's primary household ID."""
     # First try to get household where user is an admin (most likely primary)
     result = await db.execute(
@@ -30,10 +30,10 @@ async def get_user_household_id(user: User, db: AsyncSession) -> Optional[int]:
         .limit(1)
     )
     household_id = result.scalar_one_or_none()
-    
+
     if household_id:
         return household_id
-    
+
     # If no admin household, get any household the user is a member of
     result = await db.execute(
         select(HouseholdMember.household_id)
@@ -54,9 +54,9 @@ async def get_pantry_items(
     household_id = await get_user_household_id(current_user, db)
     if not household_id:
         raise HTTPException(status_code=400, detail="User is not a member of any household")
-    
+
     query = select(PantryItem).where(PantryItem.household_id == household_id)
-    
+
     if category:
         query = query.join(PantryCategory).where(PantryCategory.name == category)
     if search:
@@ -77,7 +77,7 @@ async def create_pantry_item(
     household_id = await get_user_household_id(current_user, db)
     if not household_id:
         raise HTTPException(status_code=400, detail="User is not a member of any household")
-    
+
     pantry_item = PantryItem(
         **pantry_item_data.dict(),
         household_id=household_id,
@@ -100,7 +100,7 @@ async def update_pantry_item(
     household_id = await get_user_household_id(current_user, db)
     if not household_id:
         raise HTTPException(status_code=400, detail="User is not a member of any household")
-    
+
     # Fetch the existing pantry item
     result = await db.execute(
         select(PantryItem).options(selectinload(PantryItem.category), selectinload(PantryItem.added_by_user)).where(
@@ -108,7 +108,7 @@ async def update_pantry_item(
             PantryItem.household_id == household_id)
     )
     pantry_item = result.scalar_one_or_none()
-    
+
     if pantry_item is None:
         raise HTTPException(status_code=404, detail="Pantry item not found.")
 
@@ -130,7 +130,7 @@ async def delete_pantry_item(
     household_id = await get_user_household_id(current_user, db)
     if not household_id:
         raise HTTPException(status_code=400, detail="User is not a member of any household")
-    
+
     # Fetch the existing pantry item
     result = await db.execute(
         select(PantryItem).where(
@@ -138,7 +138,7 @@ async def delete_pantry_item(
             PantryItem.household_id == household_id)
     )
     pantry_item = result.scalar_one_or_none()
-    
+
     if pantry_item is None:
         raise HTTPException(status_code=404, detail="Pantry item not found.")
 

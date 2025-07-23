@@ -3,20 +3,20 @@ Database models for Bruno AI Server.
 """
 
 from .base import Base
-from .user import User, Household, HouseholdMember
-from .pantry import PantryItem, PantryCategory
+from .pantry import PantryCategory, PantryItem
 from .recipe import Recipe, RecipeIngredient, UserFavorite
-from .shopping import ShoppingList, ShoppingListItem, Order, OrderItem
+from .shopping import Order, OrderItem, ShoppingList, ShoppingListItem
+from .user import Household, HouseholdMember, User
 
 __all__ = [
     "Base",
     "User",
-    "Household", 
+    "Household",
     "HouseholdMember",
     "PantryItem",
     "PantryCategory",
     "Recipe",
-    "RecipeIngredient", 
+    "RecipeIngredient",
     "UserFavorite",
     "ShoppingList",
     "ShoppingListItem",
