@@ -1,0 +1,120 @@
+name: Deploy to Cloud Run
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+        - staging
+        - production
+
+env:
+  GCP_REGION: us-central1
+  SERVICE_NAME: bruno-ai
+
+jobs:
+  # Run backend tests before deployment
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./server
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+      with:
+        version: latest
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+
+    - name: Install dependencies
+      run: poetry install --no-interaction
+
+    - name: Run tests
+      run: poetry run pytest
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    environment: ${{ github.event.inputs.environment || 'staging' }}
+
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v4
+
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+
+    - name: Configure Docker to use gcloud as credential helper
+      run: gcloud auth configure-docker
+
+    - name: Build Docker image
+      run: |
+        docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }} ./server
+        docker tag gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }} gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ env.SERVICE_NAME }}:latest
+
+    - name: Push Docker image to GCR
+      run: |
+        docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
+        docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ env.SERVICE_NAME }}:latest
+
+    - name: Deploy to Cloud Run (Staging)
+      if: github.event.inputs.environment == 'staging' || github.event.inputs.environment == ''
+      run: |
+        gcloud run deploy ${{ env.SERVICE_NAME }}-staging \
+          --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }} \
+          --platform managed \
+          --region ${{ env.GCP_REGION }} \
+          --allow-unauthenticated \
+          --port 8000 \
+          --memory 512Mi \
+          --cpu 1 \
+          --max-instances 10 \
+          --set-env-vars DATABASE_URL=${{ secrets.DATABASE_URL_STAGING }} \
+          --set-env-vars SECRET_KEY=${{ secrets.SECRET_KEY }} \
+          --set-env-vars ENVIRONMENT=staging
+
+    - name: Deploy to Cloud Run (Production)
+      if: github.event.inputs.environment == 'production'
+      run: |
+        gcloud run deploy ${{ env.SERVICE_NAME }}-production \
+          --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }} \
+          --platform managed \
+          --region ${{ env.GCP_REGION }} \
+          --allow-unauthenticated \
+          --port 8000 \
+          --memory 1Gi \
+          --cpu 2 \
+          --max-instances 100 \
+          --set-env-vars DATABASE_URL=${{ secrets.DATABASE_URL_PRODUCTION }} \
+          --set-env-vars SECRET_KEY=${{ secrets.SECRET_KEY }} \
+          --set-env-vars ENVIRONMENT=production
+
+    - name: Output deployment URL
+      run: |
+        if [ "${{ github.event.inputs.environment }}" = "production" ]; then
+          SERVICE_URL=$(gcloud run services describe ${{ env.SERVICE_NAME }}-production --region=${{ env.GCP_REGION }} --format='value(status.url)')
+        else
+          SERVICE_URL=$(gcloud run services describe ${{ env.SERVICE_NAME }}-staging --region=${{ env.GCP_REGION }} --format='value(status.url)')
+        fi
+        echo "🚀 Deployment successful! Service URL: $SERVICE_URL"

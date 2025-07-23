@@ -1,0 +1,43 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+
+repos:
+-   repo: https://github.com/psf/black
+    rev: 24.3.0
+    hooks:
+    -   id: black
+        files: ^server/
+        args: ["--line-length=88"]
+
+-   repo: https://github.com/PyCQA/isort
+    rev: 5.13.2
+    hooks:
+    -   id: isort
+        files: ^server/
+        args: ["--profile", "black"]
+
+-   repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.3.4
+    hooks:
+    -   id: ruff
+        files: ^server/
+        args: ["--fix"]
+    -   id: ruff-format
+        files: ^server/
+
+-   repo: https://github.com/PyCQA/flake8
+    rev: 7.0.0
+    hooks:
+    -   id: flake8
+        files: ^server/
+        args: ["--max-line-length=88", "--extend-ignore=E203,W503"]
+
+-   repo: local
+    hooks:
+    -   id: flutter-format
+        name: flutter format
+        entry: flutter
+        args: ["format", "--line-length=120", "lib/"]
+        files: \.dart$
+        language: system
+
