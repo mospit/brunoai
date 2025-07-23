@@ -1,0 +1,1072 @@
+{
+  "tags": {
+    "master": {
+      "metadata": {
+        "name": "master",
+        "description": "Main development tasks",
+        "created": "2025-07-22T18:57:20.383Z",
+        "lastModified": "2025-07-22T18:57:20.383Z"
+      },
+      "tasks": []
+    }
+  },
+  "currentTag": "master",
+  "mvp": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Project Foundation and Setup",
+        "description": "Set up project structure, development environment, and core infrastructure for Bruno AI V3.1",
+        "details": "Initialize Flutter project, set up FastAPI backend, configure PostgreSQL database with SQLAlchemy ORM, implement user authentication system, and establish GCP infrastructure with Cloud SQL, Storage, and Functions.",
+        "testStrategy": "Verify successful project compilation, database connection, and basic API endpoints responding",
+        "status": "pending",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Project Structure Setup",
+            "description": "Establish the foundational directory and file structure for both Flutter frontend and FastAPI backend, ensuring clear separation of concerns.",
+            "dependencies": [],
+            "details": "Create root directories for client (Flutter) and server (FastAPI), and initialize each with their respective starter files and folders for modular development.",
+            "status": "pending",
+            "testStrategy": "Verify both client and server directories exist with initial files and can be opened in respective IDEs."
+          },
+          {
+            "id": 2,
+            "title": "Development Environment Configuration",
+            "description": "Configure local development environments for Flutter and FastAPI, including dependency management and environment variable setup.",
+            "dependencies": [
+              "1.1"
+            ],
+            "details": "Set up virtual environments, install required packages, configure .env files for secrets, and ensure both frontend and backend can run locally.",
+            "status": "pending",
+            "testStrategy": "Run both Flutter and FastAPI development servers and confirm no dependency or environment errors."
+          },
+          {
+            "id": 3,
+            "title": "Database Schema Design",
+            "description": "Design and implement the initial PostgreSQL database schema using SQLAlchemy ORM, covering users, pantry items, and authentication tables.",
+            "dependencies": [
+              "1.1",
+              "1.2"
+            ],
+            "details": "Define SQLAlchemy models for core entities, create migration scripts, and apply them to the Cloud SQL instance.",
+            "status": "pending",
+            "testStrategy": "Run migrations and verify tables are created as expected in the database."
+          },
+          {
+            "id": 4,
+            "title": "User Authentication System Implementation",
+            "description": "Develop a secure user authentication system with registration, login, and token-based session management.",
+            "dependencies": [
+              "1.3"
+            ],
+            "details": "Implement FastAPI authentication endpoints, password hashing, JWT token issuance, and user model integration.",
+            "status": "pending",
+            "testStrategy": "Test registration, login, and token validation flows via API endpoints."
+          },
+          {
+            "id": 5,
+            "title": "Basic Pantry CRUD Operations",
+            "description": "Implement Create, Read, Update, and Delete operations for pantry items via FastAPI endpoints.",
+            "dependencies": [
+              "1.3",
+              "1.4"
+            ],
+            "details": "Develop RESTful endpoints for pantry item management, ensuring proper authentication and data validation.",
+            "status": "pending",
+            "testStrategy": "Test all CRUD endpoints with authenticated requests and verify database changes."
+          },
+          {
+            "id": 6,
+            "title": "CI/CD Pipeline Skeleton Setup",
+            "description": "Establish the initial continuous integration and deployment pipeline for both frontend and backend.",
+            "dependencies": [
+              "1.1",
+              "1.2"
+            ],
+            "details": "Configure basic CI/CD workflows (e.g., GitHub Actions or Cloud Build) for linting, testing, and deployment triggers.",
+            "status": "pending",
+            "testStrategy": "Push code changes and verify that CI/CD pipelines execute and report status."
+          },
+          {
+            "id": 7,
+            "title": "API Gateway Setup",
+            "description": "Configure an API gateway to route and secure backend endpoints, supporting scalability and unified access.",
+            "dependencies": [
+              "1.4",
+              "1.5"
+            ],
+            "details": "Set up GCP API Gateway or equivalent, define routing rules, and connect to FastAPI backend services.",
+            "status": "pending",
+            "testStrategy": "Send requests through the gateway and confirm correct routing and authentication enforcement."
+          },
+          {
+            "id": 8,
+            "title": "Security Framework Implementation",
+            "description": "Integrate foundational security measures across the stack, including HTTPS, CORS, and secret management.",
+            "dependencies": [
+              "1.2",
+              "1.4",
+              "1.7"
+            ],
+            "details": "Enable HTTPS, configure CORS policies, manage secrets securely, and audit initial endpoints for vulnerabilities.",
+            "status": "pending",
+            "testStrategy": "Perform security checks on endpoints, verify HTTPS enforcement, and test CORS restrictions."
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Smart Pantry Tracking System",
+        "description": "Implement smart pantry item tracking with voice, text, and barcode input methods",
+        "details": "Create pantry item data model, implement add/edit/delete operations via voice commands, text input, and barcode scanning. Include expiration date management with smart defaults and visual warnings 3 days prior. Add search and filter functionality for pantry contents.",
+        "testStrategy": "Test adding items via all input methods, verify expiration warnings trigger correctly, confirm search/filter functionality works",
+        "status": "pending",
+        "dependencies": [
+          1
+        ],
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Barcode Scanning Integration",
+            "description": "Implement barcode scanning functionality to allow users to add, edit, and delete pantry items using barcode input.",
+            "dependencies": [],
+            "details": "Integrate a barcode scanning library compatible with the target platform. Map scanned barcodes to product information using a database or API. Ensure seamless item addition and editing workflows via barcode.",
+            "status": "pending",
+            "testStrategy": "Test barcode scanning with a variety of common pantry items, verify correct item identification, and ensure add/edit/delete operations function as expected."
+          },
+          {
+            "id": 2,
+            "title": "Voice Item Input Processing",
+            "description": "Develop voice command processing to enable users to manage pantry items through spoken instructions.",
+            "dependencies": [],
+            "details": "Integrate a speech-to-text engine and design a command parser for adding, editing, and deleting items. Handle ambiguous or incomplete commands gracefully and provide user feedback.",
+            "status": "pending",
+            "testStrategy": "Test voice input with different accents and phrasings, confirm accurate item recognition, and validate all CRUD operations via voice."
+          },
+          {
+            "id": 3,
+            "title": "Text Item Entry System",
+            "description": "Create a user interface for manual text-based entry, editing, and deletion of pantry items.",
+            "dependencies": [],
+            "details": "Design intuitive forms for item details including name, category, quantity, and expiration date. Support bulk entry and quick edits.",
+            "status": "pending",
+            "testStrategy": "Test manual entry for various item types, ensure validation of required fields, and verify edit/delete workflows."
+          },
+          {
+            "id": 4,
+            "title": "Expiration Date Management",
+            "description": "Implement expiration date tracking with smart defaults and proactive visual warnings.",
+            "dependencies": [
+              "2.1",
+              "2.2",
+              "2.3"
+            ],
+            "details": "Automatically suggest expiration dates based on item type or barcode data. Display visual warnings for items expiring within 3 days. Allow users to override suggested dates.",
+            "status": "pending",
+            "testStrategy": "Test default expiration assignment, verify warning triggers, and confirm user overrides are respected."
+          },
+          {
+            "id": 5,
+            "title": "Item Categorization System",
+            "description": "Develop a categorization framework for pantry items to enable filtering and organization.",
+            "dependencies": [
+              "2.3"
+            ],
+            "details": "Define standard categories (e.g., grains, canned goods, snacks) and allow custom categories. Enable category assignment during item entry and editing.",
+            "status": "pending",
+            "testStrategy": "Test category assignment, filtering by category, and creation of custom categories."
+          },
+          {
+            "id": 6,
+            "title": "Quantity Tracking and Adjustment",
+            "description": "Implement real-time tracking and adjustment of item quantities in the pantry.",
+            "dependencies": [
+              "2.1",
+              "2.2",
+              "2.3"
+            ],
+            "details": "Allow users to specify and update quantities during all input methods. Support increment/decrement actions and handle out-of-stock scenarios.",
+            "status": "pending",
+            "testStrategy": "Test quantity updates via barcode, voice, and text; verify correct inventory counts after each operation."
+          },
+          {
+            "id": 7,
+            "title": "Inventory Notifications and Alerts",
+            "description": "Set up notification system for low stock, expiring items, and other inventory events.",
+            "dependencies": [
+              "2.4",
+              "2.6"
+            ],
+            "details": "Configure push or in-app notifications for expiring items, low quantities, and other critical events. Allow users to customize notification preferences.",
+            "status": "pending",
+            "testStrategy": "Test notification delivery for all event types, confirm user preference settings are respected, and verify timely alerts."
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Voice Assistant Integration",
+        "description": "Integrate voice assistant capabilities with STT and TTS for hands-free interaction",
+        "details": "Integrate Mistral Voxtral API for speech-to-text with 95%+ accuracy on food terms. Implement TTS provider for natural-sounding responses. Support English with regional accents, include noise cancellation for kitchen environments, and provide text fallback when voice fails.",
+        "testStrategy": "Test voice recognition accuracy with food terms, verify TTS responses sound natural, validate noise cancellation works in kitchen environments",
+        "status": "pending",
+        "dependencies": [
+          1,
+          "6"
+        ],
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Mistral Voxtral STT API Integration",
+            "description": "Integrate the Mistral Voxtral API for speech-to-text (STT) to enable accurate voice transcription, focusing on food-related vocabulary.",
+            "dependencies": [],
+            "details": "Set up authentication, handle audio input (file/stream), and process API responses for real-time transcription. Ensure 95%+ accuracy on food terms.",
+            "status": "pending",
+            "testStrategy": "Test transcription accuracy with a curated set of food-related audio samples, including various accents and background noise."
+          },
+          {
+            "id": 2,
+            "title": "TTS Provider Evaluation and Integration",
+            "description": "Evaluate and integrate a text-to-speech (TTS) provider that delivers natural-sounding responses with support for English regional accents.",
+            "dependencies": [],
+            "details": "Compare leading TTS providers for voice quality, latency, and accent support. Integrate the selected provider into the voice assistant workflow.",
+            "status": "pending",
+            "testStrategy": "Play back sample responses in multiple accents and gather user feedback on naturalness and clarity."
+          },
+          {
+            "id": 3,
+            "title": "Voice UX Flow Design",
+            "description": "Design the user experience flow for hands-free voice interactions, including prompts, confirmations, and error handling.",
+            "dependencies": [],
+            "details": "Map out conversational states, fallback scenarios, and transitions between voice and text modes. Ensure accessibility and intuitive navigation.",
+            "status": "pending",
+            "testStrategy": "Conduct usability tests with target users performing common tasks using only voice commands."
+          },
+          {
+            "id": 4,
+            "title": "Noise Cancellation Implementation",
+            "description": "Implement noise cancellation to improve voice recognition accuracy in kitchen environments.",
+            "dependencies": [],
+            "details": "Integrate or configure noise suppression algorithms compatible with the STT pipeline. Optimize for typical kitchen background sounds.",
+            "status": "pending",
+            "testStrategy": "Measure STT accuracy with and without noise cancellation in simulated kitchen noise conditions."
+          },
+          {
+            "id": 5,
+            "title": "Accuracy Testing Suite",
+            "description": "Develop a comprehensive testing suite to evaluate STT and TTS accuracy, especially for food terms and regional accents.",
+            "dependencies": [
+              "3.1",
+              "3.2",
+              "3.4"
+            ],
+            "details": "Automate tests with diverse audio samples, track error rates, and generate reports for continuous improvement.",
+            "status": "pending",
+            "testStrategy": "Run regression tests on each build and flag accuracy drops below the 95% threshold."
+          },
+          {
+            "id": 6,
+            "title": "Flutter Voice Packages Integration",
+            "description": "Integrate Flutter-compatible voice packages to bridge native STT and TTS capabilities with the app’s UI.",
+            "dependencies": [
+              "3.1",
+              "3.2"
+            ],
+            "details": "Select and configure Flutter plugins for audio capture, playback, and real-time streaming to backend APIs.",
+            "status": "pending",
+            "testStrategy": "Verify seamless audio input/output on both iOS and Android devices."
+          },
+          {
+            "id": 7,
+            "title": "Voice Command Routing",
+            "description": "Implement logic to route recognized voice commands to appropriate app functions and handle ambiguous input.",
+            "dependencies": [
+              "3.1",
+              "3.3",
+              "3.6"
+            ],
+            "details": "Define command patterns, fallback intents, and error correction strategies. Ensure extensibility for future commands.",
+            "status": "pending",
+            "testStrategy": "Test command recognition and routing with a variety of phrasing and accents."
+          },
+          {
+            "id": 8,
+            "title": "Text Fallback System",
+            "description": "Develop a fallback mechanism that prompts users to switch to text input when voice recognition fails or is unavailable.",
+            "dependencies": [
+              "3.3",
+              "3.7"
+            ],
+            "details": "Detect repeated STT failures or user frustration, then offer a seamless transition to manual text entry.",
+            "status": "pending",
+            "testStrategy": "Simulate STT failures and verify that users are guided smoothly to text input with clear instructions."
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Household Sharing and Collaboration",
+        "description": "Implement household sharing functionality for collaborative pantry and shopping list management",
+        "details": "Create household invitation system via 6-digit codes, implement real-time sync of pantry changes using FastAPI WebSockets, develop conflict resolution for simultaneous edits, and establish role-based permissions (admin/member).",
+        "testStrategy": "Test multi-user scenarios with simultaneous edits, verify real-time sync works correctly, validate permission system prevents unauthorized actions",
+        "status": "pending",
+        "dependencies": [
+          1,
+          2
+        ],
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Household Data Model Design",
+            "description": "Design and implement a robust data model to represent households, members, roles, and their relationships for collaborative pantry and shopping list management.",
+            "dependencies": [],
+            "details": "Define entities such as Household, User, Membership, Role, Pantry, and ShoppingList. Establish relationships (e.g., many-to-many between users and households, role assignments, shared resources). Ensure scalability for multiple households per user and vice versa.",
+            "status": "pending",
+            "testStrategy": "Validate data integrity, enforce referential constraints, and test creation, update, and deletion of households and memberships."
+          },
+          {
+            "id": 2,
+            "title": "Invite Code Generation System",
+            "description": "Develop a secure system for generating, distributing, and validating 6-digit household invitation codes.",
+            "dependencies": [
+              "4.1"
+            ],
+            "details": "Implement unique, time-limited codes linked to specific households. Handle code expiration, collision avoidance, and secure code redemption workflows.",
+            "status": "pending",
+            "testStrategy": "Test code uniqueness, expiration handling, and successful/failed invitation flows."
+          },
+          {
+            "id": 3,
+            "title": "WebSocket Real-Time Synchronization",
+            "description": "Implement real-time synchronization of pantry and shopping list changes across all household members using FastAPI WebSockets.",
+            "dependencies": [
+              "4.1"
+            ],
+            "details": "Establish WebSocket endpoints for household channels. Ensure updates propagate instantly to all connected clients and handle reconnection logic.",
+            "status": "pending",
+            "testStrategy": "Simulate concurrent edits from multiple clients and verify real-time updates are received by all members."
+          },
+          {
+            "id": 4,
+            "title": "Conflict Resolution Logic",
+            "description": "Design and implement logic to resolve conflicts arising from simultaneous edits to shared pantry or shopping lists.",
+            "dependencies": [
+              "4.3"
+            ],
+            "details": "Define conflict scenarios (e.g., item edits, deletions, additions), select resolution strategies (last-write-wins, merge, or user prompts), and ensure data consistency.",
+            "status": "pending",
+            "testStrategy": "Test with simulated race conditions and verify correct conflict handling and user notifications."
+          },
+          {
+            "id": 5,
+            "title": "Role-Based Permissions System",
+            "description": "Establish a permissions framework supporting admin and member roles with granular access controls for household actions.",
+            "dependencies": [
+              "4.1"
+            ],
+            "details": "Define role capabilities (e.g., invite, remove, edit, view), enforce permissions at API and UI levels, and support future role expansion.",
+            "status": "pending",
+            "testStrategy": "Verify that only authorized roles can perform restricted actions and that permission changes propagate correctly."
+          },
+          {
+            "id": 6,
+            "title": "Member Management System",
+            "description": "Develop features for managing household membership, including inviting, removing, and updating member roles.",
+            "dependencies": [
+              "4.2",
+              "4.5"
+            ],
+            "details": "Implement member listing, role assignment changes, and removal workflows. Ensure audit trails for membership changes.",
+            "status": "pending",
+            "testStrategy": "Test all member management actions for correctness, permission enforcement, and audit logging."
+          },
+          {
+            "id": 7,
+            "title": "Shared Pantry State Management",
+            "description": "Implement centralized management of the shared pantry state, ensuring consistency and integrity across all household members.",
+            "dependencies": [
+              "4.3",
+              "4.4"
+            ],
+            "details": "Maintain a single source of truth for pantry data, handle concurrent updates, and provide versioning or change history if needed.",
+            "status": "pending",
+            "testStrategy": "Test for data consistency after concurrent operations and verify rollback or recovery mechanisms."
+          },
+          {
+            "id": 8,
+            "title": "Collaborative Shopping List Functionality",
+            "description": "Enable collaborative creation, editing, and completion of shopping lists within a household context.",
+            "dependencies": [
+              "4.7"
+            ],
+            "details": "Allow multiple members to add, edit, and check off items in real time. Support notifications for list changes and completion.",
+            "status": "pending",
+            "testStrategy": "Test multi-user editing, real-time updates, and notification delivery for shopping list activities."
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Basic Meal Suggestions Engine",
+        "description": "Develop basic AI-powered meal suggestion system using pantry contents",
+        "details": "Create meal suggestion engine that analyzes available pantry ingredients and suggests recipes. Include dietary preference filters, display missing ingredients for recipes, and allow users to save favorite meals for quick access. Use OpenAI GPT models for intelligent recipe matching.",
+        "testStrategy": "Test meal suggestions match available ingredients, verify dietary filters work correctly, confirm favorite meals can be saved and retrieved",
+        "status": "pending",
+        "dependencies": [
+          2,
+          3,
+          "6"
+        ],
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Recipe Algorithm Development",
+            "description": "Design and implement the core algorithm that generates meal suggestions based on available pantry ingredients using OpenAI GPT models.",
+            "dependencies": [],
+            "details": "Develop logic to analyze user-provided pantry contents and intelligently match them to suitable recipes, leveraging GPT for recipe generation and structured output formatting.",
+            "status": "pending",
+            "testStrategy": "Verify that generated recipes are relevant to the provided ingredients and formatted correctly."
+          },
+          {
+            "id": 2,
+            "title": "Ingredient Matching System",
+            "description": "Build a system to accurately match pantry ingredients to recipe requirements, accounting for synonyms and ingredient variations.",
+            "dependencies": [
+              "5.1"
+            ],
+            "details": "Implement ingredient normalization and mapping to ensure that user-inputted items are correctly recognized and matched to recipe databases or GPT-generated suggestions.",
+            "status": "pending",
+            "testStrategy": "Test with varied ingredient names and ensure correct recipe matches are returned."
+          },
+          {
+            "id": 3,
+            "title": "Dietary Preferences Integration",
+            "description": "Integrate dietary filters (e.g., vegetarian, vegan, gluten-free) into the meal suggestion engine.",
+            "dependencies": [
+              "5.1",
+              "5.2"
+            ],
+            "details": "Allow users to specify dietary restrictions and preferences, and ensure that suggested recipes comply with these requirements.",
+            "status": "pending",
+            "testStrategy": "Confirm that recipes returned respect all selected dietary filters."
+          },
+          {
+            "id": 4,
+            "title": "Missing Ingredients Identification",
+            "description": "Develop functionality to identify and display which ingredients are missing from the user's pantry for each suggested recipe.",
+            "dependencies": [
+              "5.2"
+            ],
+            "details": "Compare pantry contents with recipe requirements and clearly list any missing items needed to complete each recipe.",
+            "status": "pending",
+            "testStrategy": "Validate that missing ingredient lists are accurate for a variety of pantry and recipe combinations."
+          },
+          {
+            "id": 5,
+            "title": "Recipe Rating and Favorites System",
+            "description": "Implement a system for users to rate recipes and save favorite meals for quick future access.",
+            "dependencies": [
+              "5.1"
+            ],
+            "details": "Enable users to rate suggested recipes and maintain a personalized list of favorite meals within their profile.",
+            "status": "pending",
+            "testStrategy": "Test saving, retrieving, and updating favorite meals and ratings for multiple users."
+          },
+          {
+            "id": 6,
+            "title": "Meal Suggestion API Endpoints",
+            "description": "Develop RESTful API endpoints to serve meal suggestions, handle ingredient input, apply filters, and manage user favorites.",
+            "dependencies": [
+              "5.1",
+              "5.2",
+              "5.3",
+              "5.4",
+              "5.5"
+            ],
+            "details": "Expose endpoints for meal suggestion requests, ingredient management, dietary filtering, missing ingredient reporting, and favorites handling.",
+            "status": "pending",
+            "testStrategy": "Perform end-to-end API testing to ensure all endpoints function as intended and integrate seamlessly with the frontend."
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Multi-Agent System Implementation",
+        "description": "Implement multi-agent system architecture using CrewAI framework",
+        "details": "Set up CrewAI framework for multi-agent coordination. Implement Orchestrator Agent (central coordinator with GPT-4.1), Pantry Agent (inventory management with GPT-4.1-mini), Meal Agent (recipe suggestions with GPT-4.1), Shopping Agent (list generation), Voice Agent (STT/TTS processing), and Collaboration Agent (real-time sync). Include RouteLLM for cost-optimized model routing and Mem0 for memory layer.",
+        "testStrategy": "Test agent coordination and communication, verify RouteLLM routing works correctly, validate Mem0 memory persistence and recall",
+        "status": "pending",
+        "dependencies": [
+          1
+        ],
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "AutoGen Agent Framework Setup",
+            "description": "Initialize and configure the AutoGen agent framework within the CrewAI environment to enable dynamic agent creation and management.",
+            "dependencies": [],
+            "details": "Install required dependencies, set up project structure, and ensure compatibility between AutoGen and CrewAI for seamless agent instantiation and lifecycle management.",
+            "status": "pending",
+            "testStrategy": "Verify successful agent instantiation, lifecycle management, and integration with CrewAI orchestration."
+          },
+          {
+            "id": 2,
+            "title": "RouteLLM Cost-Optimized Routing Implementation",
+            "description": "Integrate RouteLLM to enable cost-optimized routing of model requests across agents based on workload and pricing.",
+            "dependencies": [
+              "6.1"
+            ],
+            "details": "Configure RouteLLM within the CrewAI framework, define routing policies, and connect agents to RouteLLM for dynamic model selection and cost control.",
+            "status": "pending",
+            "testStrategy": "Test routing logic under varying loads, confirm cost optimization, and validate fallback mechanisms."
+          },
+          {
+            "id": 3,
+            "title": "Mem0 Memory Layer Integration",
+            "description": "Integrate the Mem0 memory layer to provide persistent, context-aware memory for all agents in the system.",
+            "dependencies": [
+              "6.1"
+            ],
+            "details": "Set up Mem0, connect it to each agent, and configure memory scopes (short-term, long-term, entity) for context retention and recall.",
+            "status": "pending",
+            "testStrategy": "Validate memory persistence, context recall accuracy, and memory sharing between agents."
+          },
+          {
+            "id": 4,
+            "title": "Pantry Agent Development",
+            "description": "Develop the Pantry Agent for inventory management using GPT-4.1-mini, including item tracking and update logic.",
+            "dependencies": [
+              "6.1",
+              "6.3"
+            ],
+            "details": "Implement inventory data models, CRUD operations, and integrate Mem0 for stateful tracking. Ensure agent can communicate updates to other agents.",
+            "status": "pending",
+            "testStrategy": "Test inventory operations, memory recall, and inter-agent notifications."
+          },
+          {
+            "id": 5,
+            "title": "Meal Agent Development",
+            "description": "Develop the Meal Agent for recipe suggestion and meal planning using GPT-4.1, leveraging pantry data and user preferences.",
+            "dependencies": [
+              "6.1",
+              "6.3",
+              "6.4"
+            ],
+            "details": "Implement recipe generation logic, integrate with Pantry Agent for ingredient availability, and use Mem0 for user preference recall.",
+            "status": "pending",
+            "testStrategy": "Test recipe suggestions, ingredient checks, and personalized recommendations."
+          },
+          {
+            "id": 6,
+            "title": "Shopping Agent Development",
+            "description": "Develop the Shopping Agent to generate shopping lists based on meal plans and pantry inventory.",
+            "dependencies": [
+              "6.1",
+              "6.3",
+              "6.4",
+              "6.5"
+            ],
+            "details": "Implement logic to compare pantry inventory with meal requirements, generate optimized shopping lists, and prepare data for external integrations.",
+            "status": "pending",
+            "testStrategy": "Test list generation accuracy, update responsiveness, and integration readiness."
+          },
+          {
+            "id": 7,
+            "title": "Agent Coordination Logic Implementation",
+            "description": "Implement the coordination logic for orchestrating agent interactions, task delegation, and real-time synchronization using CrewAI’s orchestration features.",
+            "dependencies": [
+              "6.1",
+              "6.2",
+              "6.3",
+              "6.4",
+              "6.5",
+              "6.6"
+            ],
+            "details": "Define agent roles, communication protocols, and task flows. Integrate RouteLLM for routing and Mem0 for shared context. Ensure robust error handling and conflict resolution.",
+            "status": "pending",
+            "testStrategy": "Test multi-agent workflows, real-time updates, and conflict resolution under simulated scenarios."
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Mobile App Frontend Development",
+        "description": "Develop core mobile app UI/UX with Flutter for cross-platform deployment",
+        "details": "Create intuitive Flutter-based mobile interface supporting both voice-first and traditional UI interactions. Implement family-friendly design suitable for all ages, ensure WCAG 2.1 AA accessibility compliance, and integrate contextual intelligence for reduced cognitive load. Include main screens for pantry management, meal suggestions, household collaboration, and voice interaction.",
+        "testStrategy": "Test app usability across different age groups, verify accessibility compliance with screen readers, validate voice and touch interactions work seamlessly",
+        "status": "pending",
+        "dependencies": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Flutter Project Initialization and Environment Setup",
+            "description": "Set up the Flutter project structure, configure cross-platform build settings, and ensure compatibility with latest Flutter SDK and dependencies.",
+            "dependencies": [],
+            "details": "Initialize a new Flutter project, configure Android/iOS build targets, set up version control, and integrate essential development tools.",
+            "status": "pending",
+            "testStrategy": "Verify project builds and runs on both Android and iOS emulators/devices without errors."
+          },
+          {
+            "id": 2,
+            "title": "UI/UX Design System Implementation",
+            "description": "Develop a reusable design system with consistent theming, typography, color palettes, and widget styles for a family-friendly, accessible interface.",
+            "dependencies": [
+              "7.1"
+            ],
+            "details": "Implement a design system using Flutter's theming and custom widgets, ensuring visual consistency and scalability across all screens.",
+            "status": "pending",
+            "testStrategy": "Review UI components for consistency, test theme switching, and validate adherence to design guidelines."
+          },
+          {
+            "id": 3,
+            "title": "Pantry Management Screens Development",
+            "description": "Build intuitive screens for pantry item listing, addition, editing, deletion, and filtering, supporting both touch and voice input.",
+            "dependencies": [
+              "7.2"
+            ],
+            "details": "Create pantry overview, item detail, and edit screens using Flutter widgets, integrating state management for real-time updates.",
+            "status": "pending",
+            "testStrategy": "Test all pantry operations via UI and voice, confirm data updates reflect instantly, and validate error handling."
+          },
+          {
+            "id": 4,
+            "title": "Voice Interface Components Integration",
+            "description": "Implement voice-first interaction components for navigation, item management, and meal suggestions using speech-to-text and text-to-speech.",
+            "dependencies": [
+              "7.1",
+              "7.2"
+            ],
+            "details": "Integrate voice command widgets and feedback mechanisms, ensuring seamless fallback to traditional UI controls.",
+            "status": "pending",
+            "testStrategy": "Test voice commands for all supported actions, verify accurate recognition, and ensure fallback UI is accessible."
+          },
+          {
+            "id": 5,
+            "title": "Household Sharing and Collaboration Interface",
+            "description": "Develop UI components for household invitations, member management, and real-time collaboration on pantry and shopping lists.",
+            "dependencies": [
+              "7.2"
+            ],
+            "details": "Design and implement screens for inviting users, managing roles, and displaying real-time updates using Flutter widgets.",
+            "status": "pending",
+            "testStrategy": "Simulate multi-user scenarios, verify real-time sync, and test role-based UI restrictions."
+          },
+          {
+            "id": 6,
+            "title": "Meal Suggestions and Contextual Intelligence Display",
+            "description": "Create engaging screens for meal suggestions, leveraging contextual intelligence to reduce cognitive load and personalize recommendations.",
+            "dependencies": [
+              "7.2"
+            ],
+            "details": "Design meal suggestion cards, integrate contextual cues, and ensure recommendations are visually accessible and actionable.",
+            "status": "pending",
+            "testStrategy": "Validate meal suggestions update based on pantry contents, test contextual hints, and assess user comprehension."
+          },
+          {
+            "id": 7,
+            "title": "Shopping Integration Screens",
+            "description": "Develop interfaces for shopping list creation, editing, and integration with pantry and meal planning workflows.",
+            "dependencies": [
+              "7.3",
+              "7.6"
+            ],
+            "details": "Implement shopping list screens, enable item transfer from pantry or meal suggestions, and support collaborative editing.",
+            "status": "pending",
+            "testStrategy": "Test adding/removing items, syncing with pantry, and collaborative editing across devices."
+          },
+          {
+            "id": 8,
+            "title": "Accessibility and WCAG 2.1 AA Compliance Implementation",
+            "description": "Ensure all UI components and interactions meet WCAG 2.1 AA accessibility standards for users of all ages and abilities.",
+            "dependencies": [
+              "7.2",
+              "7.3",
+              "7.4",
+              "7.5",
+              "7.6",
+              "7.7"
+            ],
+            "details": "Audit and enhance UI for screen reader compatibility, color contrast, scalable text, and keyboard navigation.",
+            "status": "pending",
+            "testStrategy": "Conduct accessibility audits, test with screen readers, and validate compliance using automated and manual tools."
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Instacart Shopping Integration",
+        "description": "Integrate Instacart Developer Platform API for grocery ordering functionality",
+        "details": "Implement Instacart API integration for direct grocery ordering from meal suggestions. Set up affiliate tracking for commission-based revenue model (3-5% on completed orders). Include order status tracking, store selection preferences, and seamless checkout experience within the app.",
+        "testStrategy": "Test end-to-end order placement with Instacart API, verify affiliate tracking works correctly, validate order status updates in real-time",
+        "status": "pending",
+        "dependencies": [
+          1,
+          4,
+          5
+        ],
+        "priority": "medium",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Instacart Developer Platform API Setup",
+            "description": "Register for Instacart Developer Platform, obtain development API keys, and configure authentication for secure API access.",
+            "dependencies": [],
+            "details": "Sign up for development access, create API keys using the self-service dashboard, and ensure secure storage and rotation of keys as per Instacart guidelines.",
+            "status": "pending",
+            "testStrategy": "Verify API key authentication works in sandbox environment and confirm secure handling of credentials."
+          },
+          {
+            "id": 2,
+            "title": "Shopping List Generation from Meal Suggestions",
+            "description": "Implement logic to convert meal suggestions into Instacart-compatible shopping lists.",
+            "dependencies": [
+              "8.1"
+            ],
+            "details": "Map meal ingredients to Instacart product catalog, handle substitutions, and format lists according to API requirements.",
+            "status": "pending",
+            "testStrategy": "Test that generated shopping lists accurately reflect meal suggestions and are accepted by Instacart API."
+          },
+          {
+            "id": 3,
+            "title": "Affiliate Tracking Integration",
+            "description": "Set up affiliate tracking to enable commission-based revenue for completed orders.",
+            "dependencies": [
+              "8.1"
+            ],
+            "details": "Apply for an Instacart affiliate account, integrate conversion tracking, and ensure correct attribution of orders for commission payouts.",
+            "status": "pending",
+            "testStrategy": "Place test orders and verify that affiliate conversions are tracked and reported in the affiliate dashboard."
+          },
+          {
+            "id": 4,
+            "title": "Order Placement and Store Selection Workflow",
+            "description": "Develop the workflow for placing orders, including store selection and seamless checkout within the app.",
+            "dependencies": [
+              "8.2",
+              "8.3"
+            ],
+            "details": "Implement UI for store selection, integrate order placement endpoints, and ensure a smooth in-app checkout experience.",
+            "status": "pending",
+            "testStrategy": "Test end-to-end order placement, including store selection and checkout, ensuring orders are correctly submitted to Instacart."
+          },
+          {
+            "id": 5,
+            "title": "Order Status Monitoring",
+            "description": "Integrate real-time order status tracking using Instacart's post-checkout and webhook APIs.",
+            "dependencies": [
+              "8.4"
+            ],
+            "details": "Subscribe to order status updates, display real-time progress to users, and handle status changes such as fulfillment, delivery, or cancellation.",
+            "status": "pending",
+            "testStrategy": "Simulate order status changes in sandbox and verify real-time updates are reflected in the app."
+          },
+          {
+            "id": 6,
+            "title": "Error Handling and Recovery for Failed Orders",
+            "description": "Implement robust error handling for API failures, order issues, and user-facing recovery options.",
+            "dependencies": [
+              "8.4",
+              "8.5"
+            ],
+            "details": "Detect and log API errors, provide clear feedback to users, and offer retry or alternative actions for failed orders.",
+            "status": "pending",
+            "testStrategy": "Induce common failure scenarios in sandbox and confirm appropriate error messages and recovery flows are triggered."
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Testing and Quality Assurance",
+        "description": "Implement comprehensive testing strategy and quality assurance",
+        "details": "Develop unit tests with 80% code coverage, integration tests for API endpoints and third-party services, performance testing for 1,000 concurrent users, accessibility testing for WCAG compliance, voice testing for STT/TTS accuracy, memory testing for Mem0 recall, and multi-agent coordination testing. Include beta testing with 50 families over 4 weeks.",
+        "testStrategy": "Achieve target metrics: zero critical bugs, app crash rate <0.1%, voice accuracy >90%, TTS naturalness >4.0/5.0, memory recall >95%, user satisfaction >4.0/5.0",
+        "status": "pending",
+        "dependencies": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Unit Testing Implementation",
+            "description": "Develop and maintain unit tests to achieve at least 80% code coverage across all critical modules.",
+            "dependencies": [],
+            "details": "Identify core components and write automated unit tests using the chosen testing framework. Ensure tests are integrated into the CI/CD pipeline for continuous validation.",
+            "status": "pending",
+            "testStrategy": "Monitor code coverage metrics, ensure all critical paths are tested, and verify that new code includes corresponding unit tests."
+          },
+          {
+            "id": 2,
+            "title": "Integration Testing Framework",
+            "description": "Design and implement integration tests for API endpoints and third-party service interactions.",
+            "dependencies": [],
+            "details": "Set up an integration testing environment that simulates real-world API and service interactions. Automate tests to validate data flow and error handling between system components.",
+            "status": "pending",
+            "testStrategy": "Run integration tests after each build, validate API responses, and ensure third-party integrations handle edge cases and failures gracefully."
+          },
+          {
+            "id": 3,
+            "title": "Voice Accuracy Testing",
+            "description": "Test and validate speech-to-text (STT) and text-to-speech (TTS) functionalities for accuracy and naturalness.",
+            "dependencies": [],
+            "details": "Develop test cases for various voice commands and responses. Measure STT accuracy and TTS naturalness using predefined benchmarks and user feedback.",
+            "status": "pending",
+            "testStrategy": "Achieve >90% STT accuracy and >4.0/5.0 TTS naturalness scores through automated and manual voice scenario testing."
+          },
+          {
+            "id": 4,
+            "title": "Memory Testing for Mem0 Recall",
+            "description": "Assess and validate the Mem0 memory module for accurate recall and retention of user data.",
+            "dependencies": [],
+            "details": "Create test scenarios to evaluate memory recall under different usage patterns and data loads. Simulate edge cases and stress conditions.",
+            "status": "pending",
+            "testStrategy": "Verify >95% recall accuracy and monitor for data loss or corruption during repeated operations."
+          },
+          {
+            "id": 5,
+            "title": "Accessibility Testing",
+            "description": "Ensure application compliance with WCAG 2.1 AA accessibility standards.",
+            "dependencies": [],
+            "details": "Conduct automated and manual accessibility audits, including screen reader compatibility, color contrast, and keyboard navigation.",
+            "status": "pending",
+            "testStrategy": "Resolve all critical accessibility issues and confirm compliance using recognized accessibility testing tools."
+          },
+          {
+            "id": 6,
+            "title": "Performance Testing",
+            "description": "Evaluate system performance under load, targeting 1,000 concurrent users.",
+            "dependencies": [],
+            "details": "Design and execute load and stress tests to measure response times, throughput, and resource utilization. Identify and address bottlenecks.",
+            "status": "pending",
+            "testStrategy": "Ensure app crash rate remains <0.1% and response times meet predefined SLAs under peak load."
+          },
+          {
+            "id": 7,
+            "title": "User Acceptance and Beta Testing",
+            "description": "Coordinate and execute beta testing with 50 families over a 4-week period to gather real-world feedback.",
+            "dependencies": [],
+            "details": "Recruit participants, distribute test builds, collect feedback, and track issues. Analyze user satisfaction and identify usability improvements.",
+            "status": "pending",
+            "testStrategy": "Achieve user satisfaction >4.0/5.0 and resolve all critical bugs reported during beta."
+          },
+          {
+            "id": 8,
+            "title": "End-to-End Testing Scenarios",
+            "description": "Develop and automate comprehensive end-to-end test scenarios covering multi-agent coordination and core user journeys.",
+            "dependencies": [],
+            "details": "Map out critical workflows, including multi-agent interactions, and automate scenario execution to validate system behavior from start to finish.",
+            "status": "pending",
+            "testStrategy": "Ensure all major user flows execute without errors and multi-agent coordination works as intended across devices."
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Deployment and Launch Preparation",
+        "description": "Prepare for app store deployment and launch strategy execution",
+        "details": "Optimize app performance for production, complete app store submission process for iOS and Android, implement analytics and monitoring systems, set up customer support infrastructure, and execute go-to-market plan with beta launch (100 families), soft launch (regional), and full launch (national).",
+        "testStrategy": "Achieve successful app store approval, launch metrics of 1,000 users in 3 months, 45% weekly retention, and operational customer support system",
+        "status": "pending",
+        "dependencies": [
+          8,
+          9
+        ],
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "QA Testing Matrix Development",
+            "description": "Design and document a comprehensive QA testing matrix covering device types, OS versions, user scenarios, and edge cases.",
+            "dependencies": [],
+            "details": "Define all test cases, platforms, and acceptance criteria to ensure full coverage for production readiness.",
+            "status": "pending",
+            "testStrategy": "Verify matrix completeness and traceability; ensure all critical paths are tested and documented."
+          },
+          {
+            "id": 2,
+            "title": "Beta Test Cohort Setup",
+            "description": "Recruit and onboard 100 families for the closed beta, establish communication channels, and distribute beta builds.",
+            "dependencies": [
+              "10.1"
+            ],
+            "details": "Select diverse user profiles, provide onboarding materials, and set up feedback collection mechanisms.",
+            "status": "pending",
+            "testStrategy": "Confirm all beta testers have access, can install the app, and submit feedback successfully."
+          },
+          {
+            "id": 3,
+            "title": "App Store Asset Creation",
+            "description": "Produce and finalize all required app store assets for iOS and Android, including screenshots, icons, descriptions, and privacy policies.",
+            "dependencies": [],
+            "details": "Ensure assets meet platform guidelines and are optimized for discoverability and compliance.",
+            "status": "pending",
+            "testStrategy": "Validate asset acceptance in app store submission portals and compliance with latest guidelines."
+          },
+          {
+            "id": 4,
+            "title": "Instacart Affiliate Flow Implementation",
+            "description": "Integrate and test the Instacart affiliate purchase flow within the app, ensuring seamless user experience and proper tracking.",
+            "dependencies": [],
+            "details": "Implement affiliate links, track conversions, and verify compliance with Instacart's requirements.",
+            "status": "pending",
+            "testStrategy": "Test end-to-end affiliate flow, confirm tracking accuracy, and validate revenue attribution."
+          },
+          {
+            "id": 5,
+            "title": "Performance Optimization for Production",
+            "description": "Profile and optimize app performance for production environments, focusing on load times, memory usage, and responsiveness.",
+            "dependencies": [],
+            "details": "Address bottlenecks, optimize assets, and ensure smooth operation under expected user loads.",
+            "status": "pending",
+            "testStrategy": "Benchmark against target KPIs for load time, crash rate, and resource usage."
+          },
+          {
+            "id": 6,
+            "title": "Security Audit and Compliance Review",
+            "description": "Conduct a comprehensive security audit, including code review, dependency checks, and compliance verification.",
+            "dependencies": [],
+            "details": "Identify and remediate vulnerabilities, ensure SSL certificates are valid, and confirm data privacy compliance.",
+            "status": "pending",
+            "testStrategy": "Pass all security scans, resolve critical issues, and document compliance status."
+          },
+          {
+            "id": 7,
+            "title": "App Store Submission Preparation",
+            "description": "Prepare and validate all materials and configurations required for app store submission on both iOS and Android.",
+            "dependencies": [
+              "10.3",
+              "10.6"
+            ],
+            "details": "Complete metadata, provisioning profiles, build signing, and pre-submission checklists.",
+            "status": "pending",
+            "testStrategy": "Pass app store pre-checks and receive no critical rejections on first submission."
+          },
+          {
+            "id": 8,
+            "title": "Marketing Materials Development",
+            "description": "Develop and finalize all marketing collateral for launch phases, including press kits, social media assets, and launch announcements.",
+            "dependencies": [],
+            "details": "Align messaging with go-to-market strategy and ensure assets are ready for each launch stage.",
+            "status": "pending",
+            "testStrategy": "Review materials for brand consistency and readiness for scheduled launch communications."
+          },
+          {
+            "id": 9,
+            "title": "Launch Monitoring and Analytics Setup",
+            "description": "Implement and configure analytics, monitoring, and alerting systems to track app performance, user engagement, and operational health post-launch.",
+            "dependencies": [
+              "10.5",
+              "10.6",
+              "10.7"
+            ],
+            "details": "Set up dashboards, real-time alerts, and reporting for key metrics and incidents.",
+            "status": "pending",
+            "testStrategy": "Simulate launch scenarios, verify data collection, and confirm alerting workflows function as intended."
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "created": "2025-07-22T19:15:49.929Z",
+      "updated": "2025-07-22T19:18:37.959Z",
+      "description": "Bruno AI V3.1 MVP feature set"
+    }
+  },
+  "phases": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Foundation Phase",
+        "description": "Establish core project infrastructure, development environment, and foundational systems",
+        "details": "This phase encompasses setting up the project structure, development environment, and core infrastructure. Includes user authentication, basic pantry management, and initial setup of all core systems. References MVP tasks 1-2 for detailed implementation.\n\nKey deliverables:\n- Project structure and development environment\n- User authentication system\n- Basic pantry tracking functionality\n- PostgreSQL database with SQLAlchemy ORM\n- GCP infrastructure setup\n\nDuration: 8 weeks\nSuccess criteria: Users can add/view pantry items, project compiles successfully, database connections work",
+        "testStrategy": "Verify successful project compilation, database connection, basic API endpoints responding, and users can successfully add and view pantry items",
+        "status": "pending",
+        "dependencies": [],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": 2,
+        "title": "Intelligence Phase",
+        "description": "Implement AI/ML capabilities including multi-agent system and meal suggestions",
+        "details": "This phase focuses on implementing the core intelligence features of Bruno AI. Includes multi-agent system architecture with AutoGen, RouteLLM for cost optimization, Mem0 for memory layer, and basic meal suggestion engine. References MVP tasks 5-6 for detailed implementation.\n\nKey deliverables:\n- Multi-agent system with AutoGen framework\n- RouteLLM integration for cost-optimized routing\n- Mem0 memory layer implementation\n- Basic meal suggestion engine\n- AI-powered recipe recommendations using pantry contents\n\nDuration: 6 weeks\nSuccess criteria: Bruno provides relevant meal recommendations via agents with memory recall, agent coordination works seamlessly",
+        "testStrategy": "Test agent coordination and communication, verify RouteLLM routing works correctly, validate Mem0 memory persistence and recall, confirm meal suggestions match available ingredients",
+        "status": "pending",
+        "dependencies": [
+          1
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": 3,
+        "title": "Collaboration Phase",
+        "description": "Enable household sharing and collaborative features",
+        "details": "This phase implements real-time collaboration features for households. Includes household sharing with 6-digit invite codes, real-time synchronization via WebSockets, conflict resolution, role-based permissions, and shopping integration via Instacart. References MVP tasks 4 and 8 for detailed implementation.\n\nKey deliverables:\n- Household invitation system\n- Real-time sync with FastAPI WebSockets\n- Conflict resolution for simultaneous edits\n- Role-based permissions (admin/member)\n- Instacart API integration for grocery ordering\n- Affiliate tracking system for revenue\n\nDuration: 6 weeks\nSuccess criteria: Multiple users can collaborate seamlessly, real-time sync works correctly, Instacart ordering flows complete successfully",
+        "testStrategy": "Test multi-user scenarios with simultaneous edits, verify real-time sync works correctly, validate permission system, test end-to-end Instacart order placement and affiliate tracking",
+        "status": "pending",
+        "dependencies": [
+          1,
+          2
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": 4,
+        "title": "Voice Phase",
+        "description": "Implement voice-first interaction with STT and TTS capabilities",
+        "details": "This phase delivers the voice-first user experience that differentiates Bruno AI. Includes Mistral Voxtral API integration for speech-to-text, TTS provider integration for natural responses, noise cancellation for kitchen environments, and mobile app frontend development with Flutter. References MVP tasks 3 and 7 for detailed implementation.\n\nKey deliverables:\n- Mistral Voxtral STT integration (95%+ accuracy on food terms)\n- TTS provider integration for natural-sounding responses\n- Voice-first Flutter mobile interface\n- Noise cancellation for kitchen environments\n- Text fallback when voice fails\n- WCAG 2.1 AA accessibility compliance\n\nDuration: 6 weeks\nSuccess criteria: 90% voice recognition accuracy, natural TTS responses, hands-free interaction works in kitchen environments",
+        "testStrategy": "Test voice recognition accuracy with food terms, verify TTS responses sound natural, validate noise cancellation in kitchen environments, test app usability across different age groups, verify accessibility compliance",
+        "status": "pending",
+        "dependencies": [
+          1,
+          2
+        ],
+        "priority": "high",
+        "subtasks": []
+      },
+      {
+        "id": 5,
+        "title": "Launch Prep Phase",
+        "description": "Complete testing, optimization, and launch preparation",
+        "details": "This final phase focuses on comprehensive testing, quality assurance, performance optimization, and launch preparation. Includes beta testing with families, app store submission, go-to-market strategy execution, and customer support infrastructure. References MVP tasks 9-10 for detailed implementation.\n\nKey deliverables:\n- Comprehensive testing suite (unit, integration, performance, accessibility)\n- Beta testing with 50 families over 4 weeks\n- App store optimization and submission\n- Analytics and monitoring systems\n- Customer support infrastructure\n- Go-to-market plan execution (beta, soft, full launch)\n\nDuration: 6 weeks\nSuccess criteria: App store approval, zero critical bugs, target performance metrics achieved, successful beta launch with 100 families",
+        "testStrategy": "Achieve target metrics: zero critical bugs, app crash rate <0.1%, voice accuracy >90%, TTS naturalness >4.0/5.0, memory recall >95%, user satisfaction >4.0/5.0, successful app store approval",
+        "status": "pending",
+        "dependencies": [
+          3,
+          4
+        ],
+        "priority": "high",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-07-22T19:20:08.274Z",
+      "updated": "2025-07-22T19:20:59.056Z",
+      "description": "High-level milestone phases for Bruno AI project coordination"
+    }
+  }
+}

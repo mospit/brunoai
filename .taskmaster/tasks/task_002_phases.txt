@@ -1,0 +1,21 @@
+# Task ID: 2
+# Title: Intelligence Phase
+# Status: pending
+# Dependencies: 1
+# Priority: high
+# Description: Implement AI/ML capabilities including multi-agent system and meal suggestions
+# Details:
+This phase focuses on implementing the core intelligence features of Bruno AI. Includes multi-agent system architecture with AutoGen, RouteLLM for cost optimization, Mem0 for memory layer, and basic meal suggestion engine. References MVP tasks 5-6 for detailed implementation.
+
+Key deliverables:
+- Multi-agent system with AutoGen framework
+- RouteLLM integration for cost-optimized routing
+- Mem0 memory layer implementation
+- Basic meal suggestion engine
+- AI-powered recipe recommendations using pantry contents
+
+Duration: 6 weeks
+Success criteria: Bruno provides relevant meal recommendations via agents with memory recall, agent coordination works seamlessly
+
+# Test Strategy:
+Test agent coordination and communication, verify RouteLLM routing works correctly, validate Mem0 memory persistence and recall, confirm meal suggestions match available ingredients

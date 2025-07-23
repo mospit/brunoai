@@ -1,0 +1,22 @@
+# Task ID: 3
+# Title: Collaboration Phase
+# Status: pending
+# Dependencies: 1, 2
+# Priority: high
+# Description: Enable household sharing and collaborative features
+# Details:
+This phase implements real-time collaboration features for households. Includes household sharing with 6-digit invite codes, real-time synchronization via WebSockets, conflict resolution, role-based permissions, and shopping integration via Instacart. References MVP tasks 4 and 8 for detailed implementation.
+
+Key deliverables:
+- Household invitation system
+- Real-time sync with FastAPI WebSockets
+- Conflict resolution for simultaneous edits
+- Role-based permissions (admin/member)
+- Instacart API integration for grocery ordering
+- Affiliate tracking system for revenue
+
+Duration: 6 weeks
+Success criteria: Multiple users can collaborate seamlessly, real-time sync works correctly, Instacart ordering flows complete successfully
+
+# Test Strategy:
+Test multi-user scenarios with simultaneous edits, verify real-time sync works correctly, validate permission system, test end-to-end Instacart order placement and affiliate tracking
