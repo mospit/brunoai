@@ -2,7 +2,8 @@
 Base SQLAlchemy model configuration with async support.
 """
 
-from sqlalchemy import Column, DateTime, Integer, func
+from sqlalchemy import Column, DateTime, func
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -13,7 +14,7 @@ Base = declarative_base(cls=AsyncAttrs)
 class TimestampMixin:
     """Mixin to add created_at and updated_at timestamps to models."""
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(UUID(as_uuid=True), primary_key=True, index=True)
     created_at = Column(
         DateTime(timezone=True),
         server_default=func.now(),

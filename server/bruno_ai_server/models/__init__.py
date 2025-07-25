@@ -2,6 +2,7 @@
 Database models for Bruno AI Server.
 """
 
+from .auth import EmailVerification, RefreshToken
 from .base import Base
 from .pantry import PantryCategory, PantryItem
 from .recipe import Recipe, RecipeIngredient, UserFavorite
@@ -13,6 +14,8 @@ __all__ = [
     "User",
     "Household",
     "HouseholdMember",
+    "RefreshToken",
+    "EmailVerification",
     "PantryItem",
     "PantryCategory",
     "Recipe",

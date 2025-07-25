@@ -11,7 +11,7 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
 )
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import relationship
 
 from .base import Base, TimestampMixin
@@ -56,7 +56,7 @@ class RecipeIngredient(Base, TimestampMixin):
 
     __tablename__ = "recipe_ingredients"
 
-    recipe_id = Column(Integer, ForeignKey("recipes.id"), nullable=False)
+    recipe_id = Column(UUID(as_uuid=True), ForeignKey("recipes.id"), nullable=False)
     name = Column(String(255), nullable=False)
     quantity = Column(Float)
     unit = Column(String(50))
@@ -75,8 +75,8 @@ class UserFavorite(Base, TimestampMixin):
 
     __tablename__ = "user_favorites"
 
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    recipe_id = Column(Integer, ForeignKey("recipes.id"), nullable=False)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    recipe_id = Column(UUID(as_uuid=True), ForeignKey("recipes.id"), nullable=False)
     rating = Column(Integer)  # 1-5 star rating
     notes = Column(Text)  # Personal notes about the recipe
 

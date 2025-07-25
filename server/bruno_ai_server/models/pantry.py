@@ -5,7 +5,7 @@ Pantry-related database models.
 from datetime import date
 
 from sqlalchemy import Column, Date, Float, ForeignKey, Integer, String, Text
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import relationship
 
 from .base import Base, TimestampMixin
@@ -47,9 +47,9 @@ class PantryItem(Base, TimestampMixin):
     notes = Column(Text)
 
     # Relationships
-    household_id = Column(Integer, ForeignKey("households.id"), nullable=False)
-    category_id = Column(Integer, ForeignKey("pantry_categories.id"))
-    added_by_user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    household_id = Column(UUID(as_uuid=True), ForeignKey("households.id"), nullable=False)
+    category_id = Column(UUID(as_uuid=True), ForeignKey("pantry_categories.id"))
+    added_by_user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
 
     household = relationship("Household", back_populates="pantry_items")
     category = relationship("PantryCategory", back_populates="pantry_items")

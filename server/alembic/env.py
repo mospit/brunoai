@@ -4,7 +4,7 @@ Alembic migrate environment configuration
 
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config, pool
+from sqlalchemy import engine_from_config, pool, text
 
 from alembic import context
 from bruno_ai_server.config import settings
@@ -64,6 +64,8 @@ def run_migrations_offline():
     )
 
     with context.begin_transaction():
+        # Ensure uuid-ossp extension is available for offline mode
+        context.execute('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"')
         context.run_migrations()
 
 
@@ -81,6 +83,9 @@ def run_migrations_online():
     )
 
     with connectable.connect() as connection:
+        # Ensure uuid-ossp extension is available
+        connection.execute(text('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"'))
+        
         context.configure(
             connection=connection, target_metadata=target_metadata
         )

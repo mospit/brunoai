@@ -13,7 +13,7 @@ from sqlalchemy import (
     String,
     UniqueConstraint,
 )
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import relationship
 
 from .base import Base, TimestampMixin
@@ -25,8 +25,7 @@ class User(Base, TimestampMixin):
     __tablename__ = "users"
 
     email = Column(String(255), unique=True, index=True, nullable=False)
-    hashed_password = Column(String(255), nullable=False)
-    full_name = Column(String(255), nullable=False)
+    name = Column(String(255), nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
     is_verified = Column(Boolean, default=False, nullable=False)
 
@@ -35,14 +34,20 @@ class User(Base, TimestampMixin):
     voice_settings = Column(JSONB, default=dict)
     notification_preferences = Column(JSONB, default=dict)
 
+    household_id = Column(UUID(as_uuid=True), ForeignKey("households.id"), nullable=True)
+    
     # Relationships
     household_memberships = relationship("HouseholdMember", back_populates="user")
-    owned_households = relationship("Household", back_populates="owner")
+    owned_households = relationship("Household", back_populates="admin_user")
     pantry_items = relationship("PantryItem", back_populates="added_by_user")
     favorite_recipes = relationship("UserFavorite", back_populates="user")
+    refresh_tokens = relationship("RefreshToken", back_populates="user", cascade="all, delete-orphan")
+    email_verifications = relationship("EmailVerification", back_populates="user", cascade="all, delete-orphan")
+
+    # No constraints
 
     def __repr__(self):
-        return f"<User(id={self.id}, email='{self.email}', full_name='{self.full_name}')>"
+        return f"<User(id={self.id}, email='{self.email}', name='{self.name}')>"
 
 
 class Household(Base, TimestampMixin):
@@ -51,14 +56,14 @@ class Household(Base, TimestampMixin):
     __tablename__ = "households"
 
     name = Column(String(255), nullable=False)
-    invite_code = Column(String(6), unique=True, index=True, nullable=False)
-    owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    invite_code = Column(String(8), unique=True, index=True, nullable=False)
+    admin_user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
 
     # Household settings stored as JSON
     settings = Column(JSONB, default=dict)
 
     # Relationships
-    owner = relationship("User", back_populates="owned_households")
+    admin_user = relationship("User", back_populates="owned_households")
     members = relationship("HouseholdMember", back_populates="household")
     pantry_items = relationship("PantryItem", back_populates="household")
 
@@ -71,8 +76,8 @@ class HouseholdMember(Base, TimestampMixin):
 
     __tablename__ = "household_members"
 
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    household_id = Column(Integer, ForeignKey("households.id"), nullable=False)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    household_id = Column(UUID(as_uuid=True), ForeignKey("households.id"), nullable=False)
     role = Column(String(50), default="member", nullable=False)  # admin, member
     joined_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 

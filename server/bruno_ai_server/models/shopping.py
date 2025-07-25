@@ -12,7 +12,7 @@ from sqlalchemy import (
     String,
     Text,
 )
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import relationship
 
 from .base import Base, TimestampMixin
@@ -31,8 +31,8 @@ class ShoppingList(Base, TimestampMixin):
     is_shared = Column(Boolean, default=True)
 
     # Relationships
-    household_id = Column(Integer, ForeignKey("households.id"), nullable=False)
-    created_by_user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    household_id = Column(UUID(as_uuid=True), ForeignKey("households.id"), nullable=False)
+    created_by_user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
 
     household = relationship("Household")
     created_by_user = relationship("User")
@@ -65,14 +65,14 @@ class ShoppingListItem(Base, TimestampMixin):
     actual_price = Column(Float)
 
     # Relationships
-    shopping_list_id = Column(Integer, ForeignKey("shopping_lists.id"), nullable=False)
-    added_by_user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    shopping_list_id = Column(UUID(as_uuid=True), ForeignKey("shopping_lists.id"), nullable=False)
+    added_by_user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
 
     shopping_list = relationship("ShoppingList", back_populates="items")
     added_by_user = relationship("User")
 
     # Recipe connection (if item comes from a recipe)
-    recipe_id = Column(Integer, ForeignKey("recipes.id"))
+    recipe_id = Column(UUID(as_uuid=True), ForeignKey("recipes.id"))
     recipe = relationship("Recipe")
 
     def __repr__(self):
@@ -104,9 +104,9 @@ class Order(Base, TimestampMixin):
     delivery_instructions = Column(Text)
 
     # Relationships
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    household_id = Column(Integer, ForeignKey("households.id"), nullable=False)
-    shopping_list_id = Column(Integer, ForeignKey("shopping_lists.id"))
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    household_id = Column(UUID(as_uuid=True), ForeignKey("households.id"), nullable=False)
+    shopping_list_id = Column(UUID(as_uuid=True), ForeignKey("shopping_lists.id"))
 
     user = relationship("User")
     household = relationship("Household")
@@ -138,8 +138,8 @@ class OrderItem(Base, TimestampMixin):
     size = Column(String(50))
 
     # Relationships
-    order_id = Column(Integer, ForeignKey("orders.id"), nullable=False)
-    shopping_list_item_id = Column(Integer, ForeignKey("shopping_list_items.id"))
+    order_id = Column(UUID(as_uuid=True), ForeignKey("orders.id"), nullable=False)
+    shopping_list_item_id = Column(UUID(as_uuid=True), ForeignKey("shopping_list_items.id"))
 
     order = relationship("Order", back_populates="items")
     shopping_list_item = relationship("ShoppingListItem")

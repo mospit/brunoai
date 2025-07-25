@@ -32,7 +32,12 @@ class Settings(BaseSettings):
     instacart_api_key: str | None = Field(default=None, description="Instacart API key")
     mem0_api_key: str | None = Field(default=None, description="Mem0 API key")
     voxtral_api_key: str | None = Field(default=None, description="Voxtral API key for STT")
-    tts_api_key: str | None = Field(default=None, description="TTS provider API key")
+    
+    # TTS Provider APIs
+    elevenlabs_api_key: str | None = Field(default=None, description="ElevenLabs API key for TTS")
+    aws_access_key_id: str | None = Field(default=None, description="AWS access key for Polly TTS")
+    aws_secret_access_key: str | None = Field(default=None, description="AWS secret key for Polly TTS")
+    aws_region: str = Field(default="us-east-1", description="AWS region for Polly TTS")
 
     # AI/ML APIs
     openai_api_key: str | None = Field(default=None, description="OpenAI API key")
