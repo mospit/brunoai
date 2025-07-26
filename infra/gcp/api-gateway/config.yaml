@@ -1,0 +1,42 @@
+apiVersion: apigateway.cnrm.cloud.google.com/v1beta1
+kind: Api
+metadata:
+  name: bruno-ai-api
+  namespace: apigateway-namespace
+spec:
+  projectRef:
+    name: your-gcp-project-name
+  description: "API Gateway for Bruno AI"
+---
+apiVersion: apigateway.cnrm.cloud.google.com/v1beta1
+kind: ApiConfig
+metadata:
+  name: bruno-ai-api-config
+  namespace: apigateway-namespace
+spec:
+  apiRef:
+    name: bruno-ai-api
+  projectRef:
+    name: your-gcp-project-name
+  backend:
+    googleService:
+      uri: https://your-cloud-run-service-url.a.run.app
+  openapiDocuments:
+  - path: gs://your-bucket-name/openapi/openapi.json  # Adjust this to your GCS bucket
+  security:
+    jwtProvider:
+      issuer: "bruno-ai-server"
+      audiences:
+      - "bruno-ai-mobile-app"
+      jwksUri: https://www.googleapis.com/oauth2/v3/certs
+---
+apiVersion: apigateway.cnrm.cloud.google.com/v1beta1
+kind: Gateway
+metadata:
+  name: bruno-ai-gateway
+  namespace: apigateway-namespace
+spec:
+  apiConfigRef:
+    name: bruno-ai-api-config
+  defaultHostname: bruno-ai.example.com
+

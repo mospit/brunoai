@@ -3,6 +3,7 @@ Authentication utilities for Bruno AI Server.
 """
 
 from datetime import datetime, timedelta
+from uuid import UUID
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -22,6 +23,8 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 15
 REFRESH_TOKEN_EXPIRE_DAYS = 7
+JWT_AUDIENCE = "bruno-ai-mobile-app"
+JWT_ISSUER = "bruno-ai-server"
 
 # Security scheme
 security = HTTPBearer()
@@ -40,14 +43,21 @@ def get_password_hash(password: str) -> str:
 def create_access_token(
     data: dict, expires_delta: timedelta | None = None
 ) -> str:
-    """Create JWT access token."""
+    """Create JWT access token with audience and issuer claims."""
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
         expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
 
-    to_encode.update({"exp": expire})
+    # Add standard JWT claims
+    to_encode.update({
+        "exp": expire,
+        "iat": datetime.utcnow(),
+        "iss": JWT_ISSUER,
+        "aud": JWT_AUDIENCE,
+    })
+    
     encoded_jwt = jwt.encode(to_encode, settings.jwt_secret, algorithm=ALGORITHM)
     return encoded_jwt
 
@@ -55,22 +65,45 @@ def create_access_token(
 def create_refresh_token(
     data: dict, expires_delta: timedelta | None = None
 ) -> str:
-    """Create JWT refresh token."""
+    """Create JWT refresh token with audience and issuer claims."""
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
         expire = datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
 
-    to_encode.update({"exp": expire, "type": "refresh"})
+    # Add standard JWT claims
+    to_encode.update({
+        "exp": expire,
+        "iat": datetime.utcnow(),
+        "iss": JWT_ISSUER,
+        "aud": JWT_AUDIENCE,
+        "type": "refresh"
+    })
+    
     encoded_jwt = jwt.encode(to_encode, settings.jwt_secret, algorithm=ALGORITHM)
     return encoded_jwt
 
 
-def verify_token(token: str) -> dict | None:
-    """Verify and decode JWT token."""
+def verify_token(token: str, verify_audience: bool = True) -> dict | None:
+    """Verify and decode JWT token with audience and issuer validation."""
     try:
-        payload = jwt.decode(token, settings.jwt_secret, algorithms=[ALGORITHM])
+        options = {
+            "verify_signature": True,
+            "verify_exp": True,
+            "verify_iat": True,
+            "verify_aud": verify_audience,
+            "verify_iss": True,
+        }
+        
+        payload = jwt.decode(
+            token, 
+            settings.jwt_secret, 
+            algorithms=[ALGORITHM],
+            audience=JWT_AUDIENCE if verify_audience else None,
+            issuer=JWT_ISSUER,
+            options=options
+        )
         return payload
     except JWTError:
         return None

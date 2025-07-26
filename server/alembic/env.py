@@ -64,8 +64,7 @@ def run_migrations_offline():
     )
 
     with context.begin_transaction():
-        # Ensure uuid-ossp extension is available for offline mode
-        context.execute('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"')
+        # Note: UUID extension creation moved to individual migrations
         context.run_migrations()
 
 
@@ -83,8 +82,7 @@ def run_migrations_online():
     )
 
     with connectable.connect() as connection:
-        # Ensure uuid-ossp extension is available
-        connection.execute(text('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"'))
+        # Note: UUID extension creation moved to individual migrations
         
         context.configure(
             connection=connection, target_metadata=target_metadata

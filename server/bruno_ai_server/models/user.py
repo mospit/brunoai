@@ -26,6 +26,7 @@ class User(Base, TimestampMixin):
 
     email = Column(String(255), unique=True, index=True, nullable=False)
     name = Column(String(255), nullable=False)
+    firebase_uid = Column(String(128), unique=True, nullable=True, index=True)
     is_active = Column(Boolean, default=True, nullable=False)
     is_verified = Column(Boolean, default=False, nullable=False)
 

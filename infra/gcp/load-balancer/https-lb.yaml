@@ -1,0 +1,227 @@
+# Global HTTP(S) Load Balancer configuration for Bruno AI
+# This provides HTTPS by default and routes traffic through API Gateway
+
+# SSL Certificate (managed by Google)
+apiVersion: compute.cnrm.cloud.google.com/v1beta1
+kind: ComputeManagedSSLCertificate
+metadata:
+  name: bruno-ai-ssl-cert
+spec:
+  projectRef:
+    name: PROJECT_ID  # Replace with actual project ID
+  managed:
+    domains:
+    - api.brunoai.app  # Replace with your actual domain
+    - brunoai.app     # Replace with your actual domain
+  description: "SSL certificate for Bruno AI API"
+---
+# Global IP Address
+apiVersion: compute.cnrm.cloud.google.com/v1beta1
+kind: ComputeGlobalAddress
+metadata:
+  name: bruno-ai-global-ip
+spec:
+  projectRef:
+    name: PROJECT_ID  # Replace with actual project ID
+  description: "Global IP address for Bruno AI load balancer"
+---
+# Backend Service pointing to API Gateway
+apiVersion: compute.cnrm.cloud.google.com/v1beta1
+kind: ComputeBackendService
+metadata:
+  name: bruno-ai-backend-service
+spec:
+  projectRef:
+    name: PROJECT_ID  # Replace with actual project ID
+  description: "Backend service for Bruno AI API Gateway"
+  protocol: "HTTPS"
+  portName: "https"
+  loadBalancingScheme: "EXTERNAL_MANAGED"
+  
+  # Health check configuration
+  healthChecks:
+  - healthCheckRef:
+      name: bruno-ai-health-check
+      
+  # Security and timeout settings
+  securitySettings:
+    clientTlsPolicy: ""
+  timeoutSec: 30
+  
+  # Connection draining timeout
+  connectionDraining:
+    drainingTimeoutSec: 300
+    
+  # Backend configuration (API Gateway)
+  backends:
+  - group: 
+      # This will point to the API Gateway NEG (Network Endpoint Group)
+      # NEG will be created automatically when API Gateway is deployed
+      networkEndpointGroupRef:
+        name: bruno-ai-api-gateway-neg
+    balancingMode: "UTILIZATION"
+    maxUtilization: 0.8
+    capacityScaler: 1.0
+---
+# Health Check for API Gateway
+apiVersion: compute.cnrm.cloud.google.com/v1beta1
+kind: ComputeHealthCheck
+metadata:
+  name: bruno-ai-health-check
+spec:
+  projectRef:
+    name: PROJECT_ID  # Replace with actual project ID
+  description: "Health check for Bruno AI API Gateway"
+  
+  # HTTPS health check
+  httpsHealthCheck:
+    port: 443
+    requestPath: "/health"
+    proxyHeader: "NONE"
+  
+  # Health check intervals and timeouts
+  checkIntervalSec: 10
+  timeoutSec: 5
+  healthyThreshold: 2
+  unhealthyThreshold: 3
+---
+# URL Map for routing
+apiVersion: compute.cnrm.cloud.google.com/v1beta1
+kind: ComputeURLMap
+metadata:
+  name: bruno-ai-url-map
+spec:
+  projectRef:
+    name: PROJECT_ID  # Replace with actual project ID
+  description: "URL map for Bruno AI load balancer"
+  
+  # Default service (API Gateway)
+  defaultService:
+    backendServiceRef:
+      name: bruno-ai-backend-service
+      
+  # Host rules for different domains
+  hostRules:
+  - hosts:
+    - "api.brunoai.app"  # Replace with your actual API domain
+    pathMatcher: "api-matcher"
+  - hosts:
+    - "brunoai.app"  # Replace with your actual main domain
+    pathMatcher: "main-matcher"
+    
+  # Path matchers
+  pathMatchers:
+  - name: "api-matcher"
+    defaultService:
+      backendServiceRef:
+        name: bruno-ai-backend-service
+    pathRules:
+    - paths:
+      - "/api/*"
+      - "/health"
+      - "/openapi.json"
+      service:
+        backendServiceRef:
+          name: bruno-ai-backend-service
+          
+  - name: "main-matcher"
+    defaultService:
+      backendServiceRef:
+        name: bruno-ai-backend-service
+    pathRules:
+    - paths:
+      - "/api/*"
+      - "/health"
+      service:
+        backendServiceRef:
+          name: bruno-ai-backend-service
+---
+# HTTPS Target Proxy
+apiVersion: compute.cnrm.cloud.google.com/v1beta1
+kind: ComputeTargetHTTPSProxy
+metadata:
+  name: bruno-ai-https-proxy
+spec:
+  projectRef:
+    name: PROJECT_ID  # Replace with actual project ID
+  description: "HTTPS target proxy for Bruno AI"
+  
+  urlMapRef:
+    name: bruno-ai-url-map
+  sslCertificates:
+  - sslCertificateRef:
+      name: bruno-ai-ssl-cert
+      
+  # Security settings
+  sslPolicy:
+    # Use modern TLS policy for security
+    minTlsVersion: "TLS_1_2"
+    profile: "MODERN"
+---
+# HTTP Target Proxy (for HTTP to HTTPS redirect)
+apiVersion: compute.cnrm.cloud.google.com/v1beta1
+kind: ComputeTargetHTTPProxy
+metadata:
+  name: bruno-ai-http-proxy
+spec:
+  projectRef:
+    name: PROJECT_ID  # Replace with actual project ID
+  description: "HTTP target proxy for Bruno AI (redirects to HTTPS)"
+  
+  # URL map for HTTP to HTTPS redirect
+  urlMapRef:
+    name: bruno-ai-redirect-map
+---
+# HTTP to HTTPS Redirect URL Map
+apiVersion: compute.cnrm.cloud.google.com/v1beta1
+kind: ComputeURLMap
+metadata:
+  name: bruno-ai-redirect-map
+spec:
+  projectRef:
+    name: PROJECT_ID  # Replace with actual project ID
+  description: "URL map to redirect HTTP to HTTPS"
+  
+  # Default redirect to HTTPS
+  defaultUrlRedirect:
+    httpsRedirect: true
+    redirectResponseCode: "MOVED_PERMANENTLY_DEFAULT"
+    stripQuery: false
+---
+# Global Forwarding Rule for HTTPS
+apiVersion: compute.cnrm.cloud.google.com/v1beta1
+kind: ComputeGlobalForwardingRule
+metadata:
+  name: bruno-ai-https-forwarding-rule
+spec:
+  projectRef:
+    name: PROJECT_ID  # Replace with actual project ID
+  description: "HTTPS forwarding rule for Bruno AI"
+  
+  IPAddress:
+    addressRef:
+      name: bruno-ai-global-ip
+  portRange: "443"
+  target:
+    targetHTTPSProxyRef:
+      name: bruno-ai-https-proxy
+  loadBalancingScheme: "EXTERNAL_MANAGED"
+---
+# Global Forwarding Rule for HTTP (redirect to HTTPS)
+apiVersion: compute.cnrm.cloud.google.com/v1beta1
+kind: ComputeGlobalForwardingRule
+metadata:
+  name: bruno-ai-http-forwarding-rule
+spec:
+  projectRef:
+    name: PROJECT_ID  # Replace with actual project ID
+  description: "HTTP forwarding rule for Bruno AI (redirects to HTTPS)"
+  
+  IPAddress:
+    addressRef:
+      name: bruno-ai-global-ip
+  portRange: "80"
+  target:
+    targetHTTPProxyRef:
+      name: bruno-ai-http-proxy
+  loadBalancingScheme: "EXTERNAL_MANAGED"

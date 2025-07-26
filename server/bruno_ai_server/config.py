@@ -27,6 +27,9 @@ class Settings(BaseSettings):
     # Google Cloud Platform
     gcp_credentials_json: str = Field(default="{}", description="GCP service account credentials JSON")
     gcp_project_id: str | None = Field(default=None, description="GCP project ID")
+    
+    # Firebase
+    firebase_web_api_key: str | None = Field(default=None, description="Firebase Web API Key for REST authentication")
 
     # Third-party APIs
     instacart_api_key: str | None = Field(default=None, description="Instacart API key")

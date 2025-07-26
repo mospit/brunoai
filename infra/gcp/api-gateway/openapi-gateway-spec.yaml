@@ -1,0 +1,288 @@
+swagger: '2.0'
+info:
+  title: Bruno AI API Gateway
+  description: API Gateway configuration for Bruno AI mobile app
+  version: 1.0.0
+  x-google-backend:
+    address: https://bruno-ai-backend.a.run.app  # Replace with actual Cloud Run URL
+    deadline: 30.0
+  x-google-endpoints:
+    - name: bruno-ai-api.endpoints.your-project-id.cloud.goog  # Replace with actual project ID
+      target: bruno-ai-backend.a.run.app  # Replace with actual Cloud Run URL
+
+# Security definitions
+securityDefinitions:
+  bruno_ai_jwt:
+    type: oauth2
+    flow: application
+    x-google-issuer: "bruno-ai-server"
+    x-google-jwks_uri: "https://bruno-ai-backend.a.run.app/.well-known/jwks.json"
+    x-google-audiences: "bruno-ai-mobile-app"
+
+# Enable CORS for mobile app
+x-google-allow:
+  - "GET"
+  - "POST" 
+  - "PUT"
+  - "DELETE"
+  - "PATCH"
+  - "OPTIONS"
+
+x-google-allow-headers:
+  - "Authorization"
+  - "Content-Type"
+  - "Accept"
+  - "Origin"
+  - "User-Agent" 
+  - "X-Requested-With"
+
+produces:
+  - application/json
+
+paths:
+  # Health check endpoint (public)
+  /health:
+    get:
+      summary: Health check
+      operationId: healthCheck
+      responses:
+        200:
+          description: Service is healthy
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+              service:
+                type: string
+      x-google-backend:
+        address: https://bruno-ai-backend.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        
+  # Root endpoint (public)
+  /:
+    get:
+      summary: Root endpoint
+      operationId: rootCheck
+      responses:
+        200:
+          description: Root response
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+      x-google-backend:
+        address: https://bruno-ai-backend.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+
+  # All API endpoints (authenticated)
+  /api/{path+}:
+    get:
+      summary: GET API endpoints
+      operationId: getApiEndpoints
+      security:
+        - bruno_ai_jwt: []  
+      parameters:
+        - name: path
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: Success
+        401:
+          description: Unauthorized
+        403:
+          description: Forbidden
+      x-google-backend:
+        address: https://bruno-ai-backend.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        
+    post:
+      summary: POST API endpoints
+      operationId: postApiEndpoints
+      security:
+        - bruno_ai_jwt: []
+      parameters:
+        - name: path
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          schema:
+            type: object
+      responses:
+        200:
+          description: Success
+        201:
+          description: Created
+        401:
+          description: Unauthorized
+        403:
+          description: Forbidden
+      x-google-backend:
+        address: https://bruno-ai-backend.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        
+    put:
+      summary: PUT API endpoints
+      operationId: putApiEndpoints
+      security:
+        - bruno_ai_jwt: []
+      parameters:
+        - name: path
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          schema:
+            type: object
+      responses:
+        200:
+          description: Success
+        401:
+          description: Unauthorized
+        403:
+          description: Forbidden
+      x-google-backend:
+        address: https://bruno-ai-backend.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        
+    delete:
+      summary: DELETE API endpoints
+      operationId: deleteApiEndpoints
+      security:
+        - bruno_ai_jwt: []
+      parameters:
+        - name: path
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: Success
+        204:
+          description: No Content
+        401:
+          description: Unauthorized
+        403:
+          description: Forbidden
+      x-google-backend:
+        address: https://bruno-ai-backend.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        
+    patch:
+      summary: PATCH API endpoints
+      operationId: patchApiEndpoints
+      security:
+        - bruno_ai_jwt: []
+      parameters:
+        - name: path
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          schema:
+            type: object
+      responses:
+        200:
+          description: Success
+        401:
+          description: Unauthorized
+        403:
+          description: Forbidden
+      x-google-backend:
+        address: https://bruno-ai-backend.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        
+    options:
+      summary: OPTIONS for CORS preflight
+      operationId: optionsApiEndpoints
+      parameters:
+        - name: path
+          in: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: CORS preflight response
+      x-google-backend:
+        address: https://bruno-ai-backend.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+
+  # Public authentication endpoints (no JWT required)
+  /api/auth/register:
+    post:
+      summary: User registration
+      operationId: registerUser
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              email:
+                type: string
+              password:
+                type: string
+              full_name:
+                type: string
+      responses:
+        200:
+          description: User registered successfully
+        400:
+          description: Bad request
+      x-google-backend:
+        address: https://bruno-ai-backend.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+        
+  /api/auth/login:
+    post:
+      summary: User login
+      operationId: loginUser
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              email:
+                type: string
+              password:
+                type: string
+      responses:
+        200:
+          description: Login successful
+        401:
+          description: Invalid credentials
+      x-google-backend:
+        address: https://bruno-ai-backend.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS
+
+  /api/auth/refresh:
+    post:
+      summary: Refresh access token
+      operationId: refreshToken
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              refresh_token:
+                type: string
+      responses:
+        200:
+          description: Token refreshed successfully
+        401:
+          description: Invalid refresh token
+      x-google-backend:
+        address: https://bruno-ai-backend.a.run.app
+        path_translation: APPEND_PATH_TO_ADDRESS

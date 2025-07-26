@@ -1,0 +1,144 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: bruno-ai-backend
+  annotations:
+    run.googleapis.com/ingress: all
+    run.googleapis.com/ingress-status: all
+    run.googleapis.com/client-name: terraform
+spec:
+  template:
+    metadata:
+      annotations:
+        # Allow all traffic
+        run.googleapis.com/ingress: all
+        # Auto-scaling configuration
+        autoscaling.knative.dev/minScale: "1"
+        autoscaling.knative.dev/maxScale: "10"
+        # CPU and memory configuration
+        run.googleapis.com/cpu-throttling: "false"
+        run.googleapis.com/execution-environment: gen2
+    spec:
+      containerConcurrency: 80
+      timeoutSeconds: 300
+      serviceAccountName: bruno-ai-backend-sa
+      containers:
+      - name: bruno-ai-backend
+        image: gcr.io/PROJECT_ID/bruno-ai-backend:latest  # Replace PROJECT_ID
+        ports:
+        - name: http1
+          containerPort: 8000
+        resources:
+          limits:
+            cpu: "2"
+            memory: "2Gi"
+          requests:
+            cpu: "1"
+            memory: "1Gi"
+        env:
+        # Application configuration
+        - name: ENVIRONMENT
+          value: "production"
+        - name: HOST
+          value: "0.0.0.0"
+        - name: PORT
+          value: "8000"
+        - name: LOG_LEVEL
+          value: "info"
+        
+        # Database configuration (from Secret Manager)
+        - name: DB_URL
+          valueFrom:
+            secretKeyRef:
+              name: bruno-ai-db-url
+              key: latest
+              
+        # JWT Configuration (from Secret Manager)
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: bruno-ai-jwt-secret
+              key: latest
+        - name: APP_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: bruno-ai-app-secret
+              key: latest
+              
+        # GCP Configuration (from Secret Manager)
+        - name: GCP_CREDENTIALS_JSON
+          valueFrom:
+            secretKeyRef:
+              name: bruno-ai-gcp-credentials
+              key: latest
+        - name: GCP_PROJECT_ID
+          value: "PROJECT_ID"  # Replace with actual project ID
+          
+        # Third-party API keys (from Secret Manager)
+        - name: INSTACART_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: bruno-ai-instacart-key
+              key: latest
+        - name: MEM0_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: bruno-ai-mem0-key
+              key: latest
+        - name: VOXTRAL_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: bruno-ai-voxtral-key
+              key: latest
+        - name: TTS_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: bruno-ai-tts-key
+              key: latest
+              
+        # AI/ML API keys (from Secret Manager)
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: bruno-ai-openai-key
+              key: latest
+        - name: ANTHROPIC_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: bruno-ai-anthropic-key
+              key: latest
+              
+        # Cache/Session configuration
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: bruno-ai-redis-url
+              key: latest
+              
+        # Health check configuration
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+          
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 5
+          failureThreshold: 3
+          
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 30

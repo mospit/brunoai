@@ -173,7 +173,7 @@ class TestAuthEndpoints:
             mock_db_session.execute = AsyncMock()
             mock_db_session.execute.return_value.scalar_one_or_none.return_value = None
 
-            response = client.post("/auth/register", json=user_data)
+            response = client.post("/users/register", json=user_data)
 
             assert response.status_code == 200
             response_data = response.json()
@@ -195,7 +195,7 @@ class TestAuthEndpoints:
             mock_get_user.return_value = sample_user  # User already exists
             mock_get_session.return_value = mock_db_session
 
-            response = client.post("/auth/register", json=user_data)
+            response = client.post("/users/register", json=user_data)
 
             assert response.status_code == 400
             assert "Email already registered" in response.json()["detail"]
@@ -208,7 +208,7 @@ class TestAuthEndpoints:
             "password": "weak"  # Less than 8 characters
         }
 
-        response = client.post("/auth/register", json=user_data)
+        response = client.post("/users/register", json=user_data)
 
         assert response.status_code == 422  # Validation error
 
@@ -225,7 +225,7 @@ class TestAuthEndpoints:
             mock_auth.return_value = sample_user
             mock_get_session.return_value = mock_db_session
 
-            response = client.post("/auth/login", json=login_data)
+            response = client.post("/users/login", json=login_data)
 
             assert response.status_code == 200
             response_data = response.json()
@@ -252,7 +252,7 @@ class TestAuthEndpoints:
             mock_auth.return_value = False  # Invalid credentials
             mock_get_session.return_value = mock_db_session
 
-            response = client.post("/auth/login", json=login_data)
+            response = client.post("/users/login", json=login_data)
 
             assert response.status_code == 401
             assert "Incorrect email or password" in response.json()["detail"]
@@ -271,7 +271,7 @@ class TestAuthEndpoints:
             mock_auth.return_value = sample_user
             mock_get_session.return_value = mock_db_session
 
-            response = client.post("/auth/login", json=login_data)
+            response = client.post("/users/login", json=login_data)
 
             assert response.status_code == 400
             assert "Inactive user" in response.json()["detail"]
@@ -287,7 +287,7 @@ class TestAuthEndpoints:
             mock_get_user.return_value = sample_user
             mock_get_session.return_value = mock_db_session
 
-            response = client.post("/auth/refresh", json=refresh_data)
+            response = client.post("/users/refresh", json=refresh_data)
 
             assert response.status_code == 200
             response_data = response.json()
@@ -310,7 +310,7 @@ class TestAuthEndpoints:
             mock_get_user.side_effect = Exception("Invalid refresh token")
             mock_get_session.return_value = mock_db_session
 
-            response = client.post("/auth/refresh", json=refresh_data)
+            response = client.post("/users/refresh", json=refresh_data)
 
             assert response.status_code == 401
 
@@ -322,7 +322,7 @@ class TestAuthEndpoints:
         with patch("bruno_ai_server.routes.auth.get_current_active_user") as mock_get_user:
             mock_get_user.return_value = sample_user
 
-            response = client.get("/auth/me", headers=headers)
+            response = client.get("/users/me", headers=headers)
 
             assert response.status_code == 200
             response_data = response.json()
@@ -332,7 +332,7 @@ class TestAuthEndpoints:
 
     def test_get_current_user_no_token(self, client):
         """Test getting current user without token."""
-        response = client.get("/auth/me")
+        response = client.get("/users/me")
 
         assert response.status_code == 403  # No authorization header
 
@@ -340,7 +340,7 @@ class TestAuthEndpoints:
         """Test getting current user with invalid token."""
         headers = {"Authorization": "Bearer invalid.token.here"}
 
-        response = client.get("/auth/me", headers=headers)
+        response = client.get("/users/me", headers=headers)
 
         assert response.status_code == 401
 
@@ -406,7 +406,7 @@ class TestAuthenticationDependencies:
             mock_result.scalar_one_or_none.return_value = sample_user
             mock_db_session.execute.return_value = mock_result
 
-            response = client.get("/auth/me", headers=headers)
+            response = client.get("/users/me", headers=headers)
 
             assert response.status_code == 200
 
@@ -424,7 +424,7 @@ class TestAuthenticationDependencies:
             mock_result.scalar_one_or_none.return_value = sample_user
             mock_db_session.execute.return_value = mock_result
 
-            response = client.get("/auth/me", headers=headers)
+            response = client.get("/users/me", headers=headers)
 
             assert response.status_code == 400
             assert "Inactive user" in response.json()["detail"]
