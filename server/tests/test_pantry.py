@@ -19,10 +19,12 @@ class TestPantryAPI:
     @pytest.fixture
     def sample_user(self):
         """Sample user for testing."""
+        import uuid
         return User(
-            id=1,
+            id=uuid.uuid4(),
             email="test@example.com",
-            full_name="Test User",
+            name="Test User",
+            firebase_uid="firebase_test_uid",
             is_active=True,
             is_verified=True,
         )

@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:client/models/pantry_category.dart';
-import 'package:client/extensions/pantry_category_extension.dart';
+import 'package:client/features/pantry/models/pantry_category.dart';
+import 'package:client/features/pantry/extensions/pantry_category_extension.dart';
 
 void main() {
   group('PantryCategory fromLabel Tests', () {

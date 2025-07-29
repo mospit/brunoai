@@ -3,7 +3,7 @@ Configuration module using pydantic-settings for environment variable management
 """
 import json
 
-from pydantic import ConfigDict, Field, validator
+from pydantic import ConfigDict, Field, field_validator
 from pydantic_settings import BaseSettings
 
 
@@ -59,7 +59,8 @@ class Settings(BaseSettings):
     environment: str = Field(default="development", description="Environment (development/production)")
     debug: bool = Field(default=False, description="Debug mode")
 
-    @validator("gcp_credentials_json")
+    @field_validator("gcp_credentials_json")
+    @classmethod
     def validate_gcp_credentials(cls, v):
         """Validate that GCP credentials is valid JSON."""
         try:
@@ -68,14 +69,16 @@ class Settings(BaseSettings):
             raise ValueError("GCP_CREDENTIALS_JSON must be valid JSON")
         return v
 
-    @validator("port")
+    @field_validator("port")
+    @classmethod
     def validate_port(cls, v):
         """Validate port is in valid range."""
         if not 1 <= v <= 65535:
             raise ValueError("Port must be between 1 and 65535")
         return v
 
-    @validator("log_level")
+    @field_validator("log_level")
+    @classmethod
     def validate_log_level(cls, v):
         """Validate log level is valid."""
         valid_levels = ["critical", "error", "warning", "info", "debug"]

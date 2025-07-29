@@ -24,6 +24,8 @@ dependencies:
   csv: ^5.0.2
   intl: ^0.19.0
   collection: ^1.18.0
+  firebase_core: any
+  firebase_auth: any
   # Authentication dependencies
   flutter_bloc: ^8.1.5
   equatable: ^2.0.5

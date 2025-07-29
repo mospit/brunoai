@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "198121118647",
+    "project_id": "bruno-ai-843f0",
+    "storage_bucket": "bruno-ai-843f0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:198121118647:android:1a47ecc58e8b61ec156632",
+        "android_client_info": {
+          "package_name": "com.example.client"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "198121118647-j62f52ikl8a241sts2knq8ipn9561t25.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAUNi4WSaIQGZLU8JLzOkbafmDHB_dgUR8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "198121118647-j62f52ikl8a241sts2knq8ipn9561t25.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

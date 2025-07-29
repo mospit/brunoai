@@ -260,7 +260,7 @@ class TestAuthenticationMiddleware:
         # Test exact matches
         assert middleware._is_public_path("/docs") is True
         assert middleware._is_public_path("/health") is True
-        assert middleware._is_public_path("/auth/login") is True
+        assert middleware._is_public_path("/api/users/login") is True  # Fixed path
         
         # Test prefix matches
         assert middleware._is_public_path("/docs/swagger") is True
@@ -268,7 +268,68 @@ class TestAuthenticationMiddleware:
         
         # Test non-public paths
         assert middleware._is_public_path("/api/pantry") is False
-        assert middleware._is_public_path("/api/users") is False
+        assert middleware._is_public_path("/api/protected") is False
+    
+    def test_public_path_trailing_slash_edge_cases(self):
+        """Test trailing slash edge cases for public path detection."""
+        middleware = AuthenticationMiddleware(None)
+        
+        # Test exact match paths with trailing slashes
+        assert middleware._is_public_path("/docs/") is True
+        assert middleware._is_public_path("/redoc/") is True
+        assert middleware._is_public_path("/health/") is True
+        assert middleware._is_public_path("/") is True  # root path
+        
+        # Test prefix matches with trailing slashes
+        assert middleware._is_public_path("/docs/") is True
+        assert middleware._is_public_path("/redoc/") is True
+        assert middleware._is_public_path("/static/") is True
+        
+        # Test prefix matches - paths that start with public prefixes
+        assert middleware._is_public_path("/docs/swagger/") is True
+        assert middleware._is_public_path("/docs/swagger/ui") is True
+        assert middleware._is_public_path("/redoc/assets/") is True
+        assert middleware._is_public_path("/static/css/") is True
+        assert middleware._is_public_path("/static/js/app.js") is True
+        
+        # Test edge case: prefix with trailing slash in the path being checked
+        # These should match because /docs/ starts with /docs
+        assert middleware._is_public_path("/docs/") is True
+        assert middleware._is_public_path("/redoc/") is True
+        assert middleware._is_public_path("/static/") is True
+        
+        # Test paths that should NOT match
+        assert middleware._is_public_path("/documents") is False  # doesn't start with /docs
+        assert middleware._is_public_path("/redocument") is False  # doesn't start with /redoc
+        assert middleware._is_public_path("/stationary") is False  # doesn't start with /static
+        
+        # Test paths with multiple trailing slashes (edge case)
+        assert middleware._is_public_path("/docs//") is True
+        assert middleware._is_public_path("/static//css/") is True
+    
+    def test_public_path_boundary_cases(self):
+        """Test boundary cases to ensure prefixes don't match incorrectly."""
+        middleware = AuthenticationMiddleware(None)
+        
+        # These paths should NOT be considered public because they don't match
+        # the prefix boundaries correctly (this was the main bug)
+        assert middleware._is_public_path("/documents") is False     # not /docs
+        assert middleware._is_public_path("/redocument") is False    # not /redoc  
+        assert middleware._is_public_path("/stationary") is False    # not /static
+        assert middleware._is_public_path("/documentation") is False # not /docs
+        assert middleware._is_public_path("/redistribute") is False  # not /redoc
+        assert middleware._is_public_path("/statistics") is False    # not /static
+        
+        # These should still work correctly (proper prefix matches)
+        assert middleware._is_public_path("/docs") is True
+        assert middleware._is_public_path("/docs/") is True
+        assert middleware._is_public_path("/docs/anything") is True
+        assert middleware._is_public_path("/redoc") is True
+        assert middleware._is_public_path("/redoc/") is True
+        assert middleware._is_public_path("/redoc/anything") is True
+        assert middleware._is_public_path("/static") is True
+        assert middleware._is_public_path("/static/") is True
+        assert middleware._is_public_path("/static/anything") is True
 
 
 class TestRequireAuth:

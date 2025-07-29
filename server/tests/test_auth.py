@@ -2,7 +2,7 @@
 Unit tests for authentication endpoints.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -13,6 +13,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from bruno_ai_server.auth import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
     ALGORITHM,
+    JWT_AUDIENCE,
+    JWT_ISSUER,
     REFRESH_TOKEN_EXPIRE_DAYS,
     create_access_token,
     create_refresh_token,
@@ -64,7 +66,13 @@ class TestJWTTokens:
         assert len(token) > 0
 
         # Verify token structure
-        payload = jwt.decode(token, settings.jwt_secret, algorithms=[ALGORITHM])
+        payload = jwt.decode(
+            token, 
+            settings.jwt_secret, 
+            algorithms=[ALGORITHM],
+            audience=JWT_AUDIENCE,
+            issuer=JWT_ISSUER
+        )
         assert payload["sub"] == "123"
         assert "exp" in payload
 
@@ -74,9 +82,15 @@ class TestJWTTokens:
         expires_delta = timedelta(minutes=30)
         token = create_access_token(data, expires_delta)
 
-        payload = jwt.decode(token, settings.jwt_secret, algorithms=[ALGORITHM])
-        exp_time = datetime.utcfromtimestamp(payload["exp"])
-        expected_time = datetime.utcnow() + expires_delta
+        payload = jwt.decode(
+            token, 
+            settings.jwt_secret, 
+            algorithms=[ALGORITHM],
+            audience=JWT_AUDIENCE,
+            issuer=JWT_ISSUER
+        )
+        exp_time = datetime.fromtimestamp(payload["exp"], tz=timezone.utc)
+        expected_time = datetime.now(timezone.utc) + expires_delta
 
         # Allow 1 second tolerance
         assert abs((exp_time - expected_time).total_seconds()) < 1
@@ -90,7 +104,13 @@ class TestJWTTokens:
         assert len(token) > 0
 
         # Verify token structure
-        payload = jwt.decode(token, settings.jwt_secret, algorithms=[ALGORITHM])
+        payload = jwt.decode(
+            token, 
+            settings.jwt_secret, 
+            algorithms=[ALGORITHM],
+            audience=JWT_AUDIENCE,
+            issuer=JWT_ISSUER
+        )
         assert payload["sub"] == "123"
         assert payload["type"] == "refresh"
         assert "exp" in payload
@@ -101,9 +121,15 @@ class TestJWTTokens:
         expires_delta = timedelta(days=14)
         token = create_refresh_token(data, expires_delta)
 
-        payload = jwt.decode(token, settings.jwt_secret, algorithms=[ALGORITHM])
-        exp_time = datetime.utcfromtimestamp(payload["exp"])
-        expected_time = datetime.utcnow() + expires_delta
+        payload = jwt.decode(
+            token, 
+            settings.jwt_secret, 
+            algorithms=[ALGORITHM],
+            audience=JWT_AUDIENCE,
+            issuer=JWT_ISSUER
+        )
+        exp_time = datetime.fromtimestamp(payload["exp"], tz=timezone.utc)
+        expected_time = datetime.now(timezone.utc) + expires_delta
 
         # Allow 1 second tolerance
         assert abs((exp_time - expected_time).total_seconds()) < 1
@@ -148,8 +174,7 @@ class TestAuthEndpoints:
         return User(
             id=1,
             email="test@example.com",
-            full_name="Test User",
-            hashed_password=get_password_hash("testpassword123"),
+            name="Test User",
             is_active=True,
             is_verified=False,
         )
@@ -158,7 +183,7 @@ class TestAuthEndpoints:
         """Test successful user registration."""
         user_data = {
             "email": "newuser@example.com",
-            "full_name": "New User",
+            "name": "New User",
             "password": "newpassword123"
         }
 
@@ -173,19 +198,19 @@ class TestAuthEndpoints:
             mock_db_session.execute = AsyncMock()
             mock_db_session.execute.return_value.scalar_one_or_none.return_value = None
 
-            response = client.post("/users/register", json=user_data)
+            response = client.post("/api/users/register", json=user_data)
 
             assert response.status_code == 200
             response_data = response.json()
             assert response_data["email"] == user_data["email"]
-            assert response_data["full_name"] == user_data["full_name"]
+            assert response_data["name"] == user_data["name"]
             assert "id" in response_data
 
     def test_register_user_duplicate_email(self, mock_db_session, client, sample_user):
         """Test registration with duplicate email."""
         user_data = {
             "email": "test@example.com",
-            "full_name": "Test User",
+            "name": "Test User",
             "password": "testpassword123"
         }
 
@@ -195,7 +220,7 @@ class TestAuthEndpoints:
             mock_get_user.return_value = sample_user  # User already exists
             mock_get_session.return_value = mock_db_session
 
-            response = client.post("/users/register", json=user_data)
+            response = client.post("/api/users/register", json=user_data)
 
             assert response.status_code == 400
             assert "Email already registered" in response.json()["detail"]
@@ -204,11 +229,11 @@ class TestAuthEndpoints:
         """Test registration with weak password."""
         user_data = {
             "email": "test@example.com",
-            "full_name": "Test User",
+            "name": "Test User",
             "password": "weak"  # Less than 8 characters
         }
 
-        response = client.post("/users/register", json=user_data)
+        response = client.post("/api/users/register", json=user_data)
 
         assert response.status_code == 422  # Validation error
 
@@ -225,7 +250,7 @@ class TestAuthEndpoints:
             mock_auth.return_value = sample_user
             mock_get_session.return_value = mock_db_session
 
-            response = client.post("/users/login", json=login_data)
+            response = client.post("/api/users/login", json=login_data)
 
             assert response.status_code == 200
             response_data = response.json()
@@ -252,7 +277,7 @@ class TestAuthEndpoints:
             mock_auth.return_value = False  # Invalid credentials
             mock_get_session.return_value = mock_db_session
 
-            response = client.post("/users/login", json=login_data)
+            response = client.post("/api/users/login", json=login_data)
 
             assert response.status_code == 401
             assert "Incorrect email or password" in response.json()["detail"]
@@ -271,7 +296,7 @@ class TestAuthEndpoints:
             mock_auth.return_value = sample_user
             mock_get_session.return_value = mock_db_session
 
-            response = client.post("/users/login", json=login_data)
+            response = client.post("/api/users/login", json=login_data)
 
             assert response.status_code == 400
             assert "Inactive user" in response.json()["detail"]
@@ -287,7 +312,7 @@ class TestAuthEndpoints:
             mock_get_user.return_value = sample_user
             mock_get_session.return_value = mock_db_session
 
-            response = client.post("/users/refresh", json=refresh_data)
+            response = client.post("/api/users/refresh", json=refresh_data)
 
             assert response.status_code == 200
             response_data = response.json()
@@ -310,7 +335,7 @@ class TestAuthEndpoints:
             mock_get_user.side_effect = Exception("Invalid refresh token")
             mock_get_session.return_value = mock_db_session
 
-            response = client.post("/users/refresh", json=refresh_data)
+            response = client.post("/api/users/refresh", json=refresh_data)
 
             assert response.status_code == 401
 
@@ -322,17 +347,17 @@ class TestAuthEndpoints:
         with patch("bruno_ai_server.routes.auth.get_current_active_user") as mock_get_user:
             mock_get_user.return_value = sample_user
 
-            response = client.get("/users/me", headers=headers)
+            response = client.get("/api/users/me", headers=headers)
 
             assert response.status_code == 200
             response_data = response.json()
             assert response_data["id"] == sample_user.id
             assert response_data["email"] == sample_user.email
-            assert response_data["full_name"] == sample_user.full_name
+            assert response_data["name"] == sample_user.name
 
     def test_get_current_user_no_token(self, client):
         """Test getting current user without token."""
-        response = client.get("/users/me")
+        response = client.get("/api/users/me")
 
         assert response.status_code == 403  # No authorization header
 
@@ -340,7 +365,7 @@ class TestAuthEndpoints:
         """Test getting current user with invalid token."""
         headers = {"Authorization": "Bearer invalid.token.here"}
 
-        response = client.get("/users/me", headers=headers)
+        response = client.get("/api/users/me", headers=headers)
 
         assert response.status_code == 401
 
@@ -353,9 +378,15 @@ class TestTokenExpiration:
         data = {"sub": "123"}
         token = create_access_token(data)
 
-        payload = jwt.decode(token, settings.jwt_secret, algorithms=[ALGORITHM])
-        exp_time = datetime.utcfromtimestamp(payload["exp"])
-        expected_time = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        payload = jwt.decode(
+            token, 
+            settings.jwt_secret, 
+            algorithms=[ALGORITHM],
+            audience=JWT_AUDIENCE,
+            issuer=JWT_ISSUER
+        )
+        exp_time = datetime.fromtimestamp(payload["exp"], tz=timezone.utc)
+        expected_time = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
 
         # Allow 1 second tolerance
         assert abs((exp_time - expected_time).total_seconds()) < 1
@@ -365,9 +396,15 @@ class TestTokenExpiration:
         data = {"sub": "123"}
         token = create_refresh_token(data)
 
-        payload = jwt.decode(token, settings.jwt_secret, algorithms=[ALGORITHM])
-        exp_time = datetime.utcfromtimestamp(payload["exp"])
-        expected_time = datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+        payload = jwt.decode(
+            token, 
+            settings.jwt_secret, 
+            algorithms=[ALGORITHM],
+            audience=JWT_AUDIENCE,
+            issuer=JWT_ISSUER
+        )
+        exp_time = datetime.fromtimestamp(payload["exp"], tz=timezone.utc)
+        expected_time = datetime.now(timezone.utc) + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
 
         # Allow 1 second tolerance
         assert abs((exp_time - expected_time).total_seconds()) < 1
@@ -387,8 +424,7 @@ class TestAuthenticationDependencies:
         return User(
             id=1,
             email="test@example.com",
-            full_name="Test User",
-            hashed_password=get_password_hash("testpassword123"),
+            name="Test User",
             is_active=True,
             is_verified=False,
         )
@@ -406,7 +442,7 @@ class TestAuthenticationDependencies:
             mock_result.scalar_one_or_none.return_value = sample_user
             mock_db_session.execute.return_value = mock_result
 
-            response = client.get("/users/me", headers=headers)
+            response = client.get("/api/users/me", headers=headers)
 
             assert response.status_code == 200
 
@@ -424,7 +460,7 @@ class TestAuthenticationDependencies:
             mock_result.scalar_one_or_none.return_value = sample_user
             mock_db_session.execute.return_value = mock_result
 
-            response = client.get("/users/me", headers=headers)
+            response = client.get("/api/users/me", headers=headers)
 
             assert response.status_code == 400
             assert "Inactive user" in response.json()["detail"]

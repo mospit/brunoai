@@ -10,7 +10,8 @@ from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from bruno_ai_server.models.user import User
-from bruno_ai_server.models.pantry import Household, PantryItem
+from bruno_ai_server.models.user import Household
+from bruno_ai_server.models.pantry import PantryItem
 
 
 class TestExampleWithScaffolding:

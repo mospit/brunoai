@@ -2,7 +2,7 @@
 Authentication utilities for Bruno AI Server.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from uuid import UUID
 
 from fastapi import Depends, HTTPException, status
@@ -46,14 +46,14 @@ def create_access_token(
     """Create JWT access token with audience and issuer claims."""
     to_encode = data.copy()
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
 
     # Add standard JWT claims
     to_encode.update({
         "exp": expire,
-        "iat": datetime.utcnow(),
+        "iat": datetime.now(timezone.utc),
         "iss": JWT_ISSUER,
         "aud": JWT_AUDIENCE,
     })
@@ -68,14 +68,14 @@ def create_refresh_token(
     """Create JWT refresh token with audience and issuer claims."""
     to_encode = data.copy()
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+        expire = datetime.now(timezone.utc) + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
 
     # Add standard JWT claims
     to_encode.update({
         "exp": expire,
-        "iat": datetime.utcnow(),
+        "iat": datetime.now(timezone.utc),
         "iss": JWT_ISSUER,
         "aud": JWT_AUDIENCE,
         "type": "refresh"
@@ -143,8 +143,15 @@ async def get_current_user(
         if payload is None:
             raise credentials_exception
 
-        user_id: int = payload.get("sub")
-        if user_id is None:
+        user_id_str = payload.get("sub")
+        if user_id_str is None:
+            raise credentials_exception
+        
+        # Convert string UUID to UUID object
+        from uuid import UUID
+        try:
+            user_id = UUID(user_id_str)
+        except (ValueError, TypeError):
             raise credentials_exception
 
     except JWTError:
@@ -190,8 +197,15 @@ async def get_user_from_refresh_token(
         if token_type != "refresh":
             raise credentials_exception
 
-        user_id: int = payload.get("sub")
-        if user_id is None:
+        user_id_str = payload.get("sub")
+        if user_id_str is None:
+            raise credentials_exception
+        
+        # Convert string UUID to UUID object
+        from uuid import UUID
+        try:
+            user_id = UUID(user_id_str)
+        except (ValueError, TypeError):
             raise credentials_exception
 
     except JWTError:

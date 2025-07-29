@@ -10,6 +10,7 @@ These tests use real database transactions and API endpoints.
 """
 
 import pytest
+import uuid
 from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -19,6 +20,7 @@ from bruno_ai_server.auth import verify_token, get_password_hash
 
 
 @pytest.mark.integration
+@pytest.mark.asyncio
 async def test_register_duplicate_email_integration(test_app: TestClient, db_session: AsyncSession):
     """
     Integration test for AC 2: System prevents registration with duplicate email.
@@ -27,6 +29,7 @@ async def test_register_duplicate_email_integration(test_app: TestClient, db_ses
     """
     # Create an existing user in the database
     existing_user = User(
+        id=uuid.uuid4(),  # Assign UUID
         email="duplicate@example.com",
         name="Existing User",
         firebase_uid="existing_firebase_uid",
@@ -44,7 +47,7 @@ async def test_register_duplicate_email_integration(test_app: TestClient, db_ses
         "password": "ValidPassword123"
     }
     
-    response = test_app.post("/users/register", json=registration_data)
+    response = test_app.post("/api/users/register", json=registration_data)
     
     # Verify the system prevents duplicate registration
     assert response.status_code == 400
@@ -57,7 +60,8 @@ async def test_register_duplicate_email_integration(test_app: TestClient, db_ses
     assert users[0].name == "Existing User"  # Original user unchanged
 
 
-@pytest.mark.integration  
+@pytest.mark.integration
+@pytest.mark.asyncio
 async def test_login_invalid_credentials_integration(test_app: TestClient, db_session: AsyncSession, mock_firebase_service_integration):
     """
     Integration test for AC 4: System returns error for invalid login credentials.
@@ -66,6 +70,7 @@ async def test_login_invalid_credentials_integration(test_app: TestClient, db_se
     """
     # Create a valid user in the database
     valid_user = User(
+        id=uuid.uuid4(),  # Assign UUID
         email="valid@example.com",
         name="Valid User", 
         firebase_uid="valid_firebase_uid",
@@ -89,7 +94,7 @@ async def test_login_invalid_credentials_integration(test_app: TestClient, db_se
         "password": "WrongPassword123"
     }
     
-    response = test_app.post("/users/login", json=login_data_wrong_password)
+    response = test_app.post("/api/users/login", json=login_data_wrong_password)
     
     assert response.status_code == 401
     assert "Incorrect email or password" in response.json()["detail"]
@@ -100,13 +105,15 @@ async def test_login_invalid_credentials_integration(test_app: TestClient, db_se
         "password": "AnyPassword123"
     }
     
-    response = test_app.post("/users/login", json=login_data_wrong_email)
+    response = test_app.post("/api/users/login", json=login_data_wrong_email)
     
-    assert response.status_code == 404
-    assert "User not found" in response.json()["detail"]
+    # Firebase authentication will fail for non-existent email, returning 401
+    assert response.status_code == 401
+    assert "Incorrect email or password" in response.json()["detail"]
     
     # Test Case 3: Inactive user
     inactive_user = User(
+        id=uuid.uuid4(),  # Assign UUID
         email="inactive@example.com",
         name="Inactive User",
         firebase_uid="inactive_firebase_uid", 
@@ -129,13 +136,14 @@ async def test_login_invalid_credentials_integration(test_app: TestClient, db_se
         "password": "ValidPassword123"
     }
     
-    response = test_app.post("/users/login", json=login_data_inactive)
+    response = test_app.post("/api/users/login", json=login_data_inactive)
     
     assert response.status_code == 400
     assert "Inactive user" in response.json()["detail"]
 
 
 @pytest.mark.integration
+@pytest.mark.asyncio
 async def test_login_jwt_token_integration(test_app: TestClient, db_session: AsyncSession, mock_firebase_service_integration):
     """
     Integration test for AC 5: User receives secure JWT token upon successful login.
@@ -144,6 +152,7 @@ async def test_login_jwt_token_integration(test_app: TestClient, db_session: Asy
     """
     # Create a valid active user in the database
     valid_user = User(
+        id=uuid.uuid4(),  # Assign UUID
         email="jwt@example.com",
         name="JWT Test User",
         firebase_uid="jwt_firebase_uid",
@@ -168,7 +177,7 @@ async def test_login_jwt_token_integration(test_app: TestClient, db_session: Asy
         "password": "ValidPassword123"
     }
     
-    response = test_app.post("/users/login", json=login_data)
+    response = test_app.post("/api/users/login", json=login_data)
     
     # Verify successful login
     assert response.status_code == 200
@@ -200,7 +209,7 @@ async def test_login_jwt_token_integration(test_app: TestClient, db_session: Asy
     # Verify token can be used to access protected endpoints
     headers = {"Authorization": f"Bearer {access_token}"}
     
-    protected_response = test_app.get("/users/me", headers=headers)
+    protected_response = test_app.get("/api/users/me", headers=headers)
     
     assert protected_response.status_code == 200
     user_data = protected_response.json()
@@ -210,6 +219,7 @@ async def test_login_jwt_token_integration(test_app: TestClient, db_session: Asy
 
 
 @pytest.mark.integration
+@pytest.mark.asyncio
 async def test_complete_registration_login_flow_integration(test_app: TestClient, db_session: AsyncSession, mock_firebase_service_integration):
     """
     Integration test for complete user registration and login flow.
@@ -223,7 +233,7 @@ async def test_complete_registration_login_flow_integration(test_app: TestClient
         "password": "ValidPassword123"
     }
     
-    register_response = test_app.post("/users/register", json=registration_data)
+    register_response = test_app.post("/api/users/register", json=registration_data)
     
     assert register_response.status_code == 200
     
@@ -232,7 +242,8 @@ async def test_complete_registration_login_flow_integration(test_app: TestClient
     assert register_data["name"] == "Complete Test User"
     assert "id" in register_data
     
-    user_id = register_data["id"]
+    user_id_str = register_data["id"]
+    user_id = uuid.UUID(user_id_str)  # Convert string to UUID
     
     # Verify user was created in database
     result = await db_session.execute(select(User).where(User.id == user_id))
@@ -278,7 +289,7 @@ async def test_complete_registration_login_flow_integration(test_app: TestClient
         "password": "ValidPassword123"
     }
     
-    login_response = test_app.post("/users/login", json=login_data)
+    login_response = test_app.post("/api/users/login", json=login_data)
     
     assert login_response.status_code == 200
     
@@ -290,15 +301,16 @@ async def test_complete_registration_login_flow_integration(test_app: TestClient
     access_token = login_response_data["access_token"]
     headers = {"Authorization": f"Bearer {access_token}"}
     
-    me_response = test_app.get("/users/me", headers=headers)
+    me_response = test_app.get("/api/users/me", headers=headers)
     assert me_response.status_code == 200
     
     me_data = me_response.json()
-    assert me_data["id"] == user_id
+    assert me_data["id"] == user_id_str  # Compare string to string
     assert me_data["email"] == "complete@example.com"
 
 
 @pytest.mark.integration
+@pytest.mark.asyncio
 async def test_password_validation_integration(test_app: TestClient):
     """
     Integration test for password strength validation.
@@ -312,7 +324,7 @@ async def test_password_validation_integration(test_app: TestClient):
         "password": "weak"  # Less than 8 characters
     }
     
-    response = test_app.post("/users/register", json=registration_data_short)
+    response = test_app.post("/api/users/register", json=registration_data_short)
     
     assert response.status_code == 422  # Validation error
     
@@ -323,12 +335,13 @@ async def test_password_validation_integration(test_app: TestClient):
         "password": ""
     }
     
-    response = test_app.post("/users/register", json=registration_data_empty)
+    response = test_app.post("/api/users/register", json=registration_data_empty)
     
     assert response.status_code == 422  # Validation error
 
 
-@pytest.mark.integration  
+@pytest.mark.integration
+@pytest.mark.asyncio
 async def test_token_refresh_integration(test_app: TestClient, db_session: AsyncSession, mock_firebase_service_integration):
     """
     Integration test for JWT token refresh functionality.
@@ -337,6 +350,7 @@ async def test_token_refresh_integration(test_app: TestClient, db_session: Async
     """
     # Create and authenticate a user
     user = User(
+        id=uuid.uuid4(),  # Assign UUID
         email="refresh@example.com",
         name="Refresh Test User",
         firebase_uid="refresh_firebase_uid",
@@ -361,7 +375,7 @@ async def test_token_refresh_integration(test_app: TestClient, db_session: Async
         "password": "ValidPassword123"
     }
     
-    login_response = test_app.post("/users/login", json=login_data)
+    login_response = test_app.post("/api/users/login", json=login_data)
     assert login_response.status_code == 200
     
     tokens = login_response.json()
@@ -370,7 +384,7 @@ async def test_token_refresh_integration(test_app: TestClient, db_session: Async
     # Use refresh token to get new access token
     refresh_data = {"refresh_token": refresh_token}
     
-    refresh_response = test_app.post("/users/refresh", json=refresh_data)
+    refresh_response = test_app.post("/api/users/refresh", json=refresh_data)
     
     assert refresh_response.status_code == 200
     
@@ -382,7 +396,7 @@ async def test_token_refresh_integration(test_app: TestClient, db_session: Async
     new_access_token = refresh_response_data["access_token"]
     headers = {"Authorization": f"Bearer {new_access_token}"}
     
-    me_response = test_app.get("/users/me", headers=headers)
+    me_response = test_app.get("/api/users/me", headers=headers)
     assert me_response.status_code == 200
     
     me_data = me_response.json()

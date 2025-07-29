@@ -27,10 +27,10 @@ class SecurityMiddleware(BaseHTTPMiddleware):
             "/redoc",
             "/openapi.json",
             "/health",
-            "/auth/login",
-            "/auth/register",
-            "/auth/csrf-token",
-            "/auth/refresh"
+            "/api/users/login",
+            "/api/users/register",
+            "/api/users/csrf-token",
+            "/api/users/refresh"
         }
         
         # State-changing methods that require CSRF

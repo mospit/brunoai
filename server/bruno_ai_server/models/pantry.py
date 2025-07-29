@@ -5,10 +5,11 @@ Pantry-related database models.
 from datetime import date
 
 from sqlalchemy import Column, Date, Float, ForeignKey, Integer, String, Text
-from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from .base import Base, TimestampMixin
+from .types import CompatibleJSONB
 
 
 class PantryCategory(Base, TimestampMixin):
@@ -56,7 +57,7 @@ class PantryItem(Base, TimestampMixin):
     added_by_user = relationship("User", back_populates="pantry_items")
 
     # Additional item data stored as JSON
-    item_metadata = Column(JSONB, default=dict)  # For nutrition info, brand, etc.
+    item_metadata = Column(CompatibleJSONB, default=dict)  # For nutrition info, brand, etc.
 
     @property
     def is_expiring_soon(self) -> bool:

@@ -12,10 +12,11 @@ from sqlalchemy import (
     String,
     Text,
 )
-from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from .base import Base, TimestampMixin
+from .types import CompatibleJSONB
 
 
 class ShoppingList(Base, TimestampMixin):
@@ -40,7 +41,7 @@ class ShoppingList(Base, TimestampMixin):
     orders = relationship("Order", back_populates="shopping_list")
 
     # Metadata for AI suggestions, preferences
-    list_metadata = Column(JSONB, default=dict)
+    list_metadata = Column(CompatibleJSONB, default=dict)
 
     def __repr__(self):
         return f"<ShoppingList(id={self.id}, name='{self.name}', status='{self.status}')>"
@@ -100,7 +101,7 @@ class Order(Base, TimestampMixin):
     actual_delivery = Column(DateTime)
 
     # Location and delivery
-    delivery_address = Column(JSONB)  # Store address as JSON
+    delivery_address = Column(CompatibleJSONB)  # Store address as JSON
     delivery_instructions = Column(Text)
 
     # Relationships
@@ -115,7 +116,7 @@ class Order(Base, TimestampMixin):
 
     # Additional tracking and metadata
     affiliate_tracking_id = Column(String(100))  # For commission tracking
-    order_metadata = Column(JSONB, default=dict)  # Store API responses, tracking info
+    order_metadata = Column(CompatibleJSONB, default=dict)  # Store API responses, tracking info
 
     def __repr__(self):
         return f"<Order(id={self.id}, external_id='{self.external_order_id}', status='{self.status}', total={self.total_amount})>"
@@ -145,7 +146,7 @@ class OrderItem(Base, TimestampMixin):
     shopping_list_item = relationship("ShoppingListItem")
 
     # Store external service item data
-    external_item_data = Column(JSONB, default=dict)
+    external_item_data = Column(CompatibleJSONB, default=dict)
 
     def __repr__(self):
         return f"<OrderItem(id={self.id}, name='{self.name}', quantity={self.quantity}, price={self.total_price})>"
