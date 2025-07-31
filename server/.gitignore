@@ -1,0 +1,28 @@
+# Environment files with sensitive credentials
+.env
+.env.local
+.env.production
+
+# Database
+*.sqlite
+*.db
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+logs/
