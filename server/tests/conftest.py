@@ -28,7 +28,8 @@ from bruno_ai_server.config import Settings, settings
 from bruno_ai_server.database import Base, get_async_session
 from bruno_ai_server.main import app
 from bruno_ai_server.models.user import User
-from bruno_ai_server.models.pantry import Household, PantryItem, PantryCategory
+from bruno_ai_server.models.user import Household
+from bruno_ai_server.models.pantry import PantryItem, PantryCategory
 from bruno_ai_server.services.firebase_service import FirebaseService
 from bruno_ai_server.auth import get_password_hash, create_access_token
 
@@ -44,6 +45,7 @@ class MockFirebaseService:
     def __init__(self):
         self.users = {}  # Store mock Firebase users
         self.auth_tokens = {}  # Store mock auth tokens
+        self._initialized = True
         
     async def verify_token(self, token: str) -> dict:
         """Mock token verification."""
@@ -79,6 +81,10 @@ class MockFirebaseService:
     def add_mock_token(self, token: str, user_data: dict):
         """Add a mock auth token for testing."""
         self.auth_tokens[token] = user_data
+    
+    def is_initialized(self) -> bool:
+        """Check if Firebase is properly initialized."""
+        return self._initialized
 
 
 @pytest.fixture(scope="session")
@@ -170,10 +176,11 @@ def test_client(test_settings, test_session, mock_firebase_service) -> TestClien
 @pytest_asyncio.fixture
 async def test_user(test_session: AsyncSession) -> User:
     """Create a test user in the database."""
+    import uuid
     user = User(
+        id=uuid.uuid4(),
         email="test@example.com",
-        full_name="Test User",
-        hashed_password=get_password_hash("testpassword123"),
+        name="Test User",
         firebase_uid="firebase_test_uid_1",
         is_active=True,
         is_verified=False,
@@ -189,10 +196,11 @@ async def test_user(test_session: AsyncSession) -> User:
 @pytest_asyncio.fixture
 async def test_inactive_user(test_session: AsyncSession) -> User:
     """Create an inactive test user."""
+    import uuid
     user = User(
+        id=uuid.uuid4(),
         email="inactive@example.com",
-        full_name="Inactive User",
-        hashed_password=get_password_hash("testpassword123"),
+        name="Inactive User",
         firebase_uid="firebase_test_uid_inactive",
         is_active=False,
         is_verified=False,

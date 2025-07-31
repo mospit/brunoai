@@ -5,10 +5,10 @@ import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart';
 import '../../lib/main.dart';
 import '../../lib/services/product_lookup_service.dart';
-import '../../lib/services/pantry_service.dart';
+import '../../lib/features/pantry/services/pantry_service.dart';
 import '../../lib/models/product.dart';
 import '../../lib/screens/barcode_scanner_screen.dart';
-import '../../lib/screens/voice_pantry_screen.dart';
+import '../../lib/features/pantry/screens/voice_pantry_screen.dart';
 
 class MockProductLookupService extends Mock implements ProductLookupService {}
 class MockPantryService extends Mock implements PantryService {}

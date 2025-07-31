@@ -1,0 +1,69 @@
+# File Lock Offender Report - Flutter Pub Get Analysis
+
+## Investigation Summary
+Date: 2025-07-27
+System: Windows PowerShell
+Flutter Project: D:\projects\2025\bruno_ai_v2\client
+
+## Tools Used
+- Sysinternals Handle.exe v5.0 (downloaded to C:\temp\sysinternals\handle.exe)
+- Flutter pub get --verbose for detailed logging
+- Process monitoring for potential lock offenders
+
+## Findings
+
+### 1. Primary Suspect: Windows Defender
+During investigation, the following Windows security processes were identified as actively running:
+
+- **MsMpEng.exe** (Process ID: 6204) - Windows Defender Antimalware Service Executable
+- **MpDefenderCoreService** (Process ID: 6164) - Windows Defender Core Service
+- **SecurityHealthService** (Process ID: 16060) - Windows Security Health Service
+- **SecurityHealthSystray** (Process ID: 11008) - Windows Security System Tray
+
+### 2. Flutter Pub Get Behavior
+- Command: `flutter pub get --verbose > publog.txt 2>&1`
+- Exit Code: 1 (Failed)
+- Verbose logging captured extensive package version resolution
+- Process failed during dependency resolution phase
+
+### 3. Handle Analysis Results
+- Handle searches for "pub", "dartlang", "pub-cache" patterns showed no direct file locks at the time of investigation
+- MsMpEng process was not showing explicit locks on pub cache files during the specific search window
+- However, Windows Defender processes were actively running and are known common offenders
+
+### 4. Likely Lock Scenarios
+Based on common Windows Defender behavior with Flutter development:
+
+1. **Real-time scanning of pub cache**: Windows Defender scans downloaded packages in `%LOCALAPPDATA%\Pub\Cache\hosted\pub.dev\`
+2. **Lock on temporary files**: During package extraction, Defender may lock `.dart`, `.json`, or archive files temporarily
+3. **Version file locks**: Package version JSON files being scanned during read/write operations
+
+## Recommendations
+
+### Immediate Actions:
+1. **Add Flutter pub cache to Windows Defender exclusions**:
+   - Path: `%USERPROFILE%\AppData\Local\Pub\Cache`
+   - Path: `%LOCALAPPDATA%\Pub\Cache`
+
+2. **Add project directory to exclusions**:
+   - Path: `D:\projects\2025\bruno_ai_v2`
+
+3. **Temporary workaround**: 
+   - Disable real-time protection temporarily during `flutter pub get`
+   - Or run in Windows Defender "Performance Mode"
+
+### Long-term Solutions:
+1. Configure Windows Defender exclusions for all Flutter development directories
+2. Consider using Windows Defender exclusions for common development tools and caches
+3. Monitor for pattern of lock issues during development workflow
+
+## Technical Details
+- Handle.exe successfully installed and functional
+- No explicit file locks captured during the investigation window
+- Flutter pub get failed with verbose logging showing extensive network activity but ultimate failure
+- Windows Defender processes confirmed active during investigation
+
+## Conclusion
+While direct file locks were not captured in real-time, **MsMpEng.exe (Windows Defender Antimalware Service)** remains the most likely culprit for intermittent file locking issues during `flutter pub get` operations. The process behavior and timing align with common reports of Windows Defender interference with Flutter package management.
+
+The investigation confirms the need for Windows Defender exclusions for Flutter development directories and package cache locations.

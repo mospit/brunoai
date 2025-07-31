@@ -48,14 +48,15 @@ class MockFirebaseServiceForIntegration:
             return self.auth_tokens[id_token]
         raise Exception("Invalid token")
     
-    async def create_user(self, email: str, password: str, name: str) -> str:
+    async def create_user(self, email: str, password: str, name: str, email_verified: bool = True) -> str:
         """Mock user creation."""
         user_id = f"firebase_uid_{len(self.users) + 1}"
         user_data = {
             "uid": user_id,
             "email": email,
             "display_name": name,
-            "email_verified": False,
+            "password": password,  # Store password for authentication
+            "email_verified": email_verified,
             "disabled": False,
             "creation_timestamp": 1640995200000,  # Mock timestamp
             "last_sign_in_timestamp": None,
@@ -65,16 +66,19 @@ class MockFirebaseServiceForIntegration:
     
     async def authenticate_user_with_password(self, email: str, password: str) -> dict:
         """Mock user authentication with password."""
-        # Find user by email
+        # Find user by email and check password
         for uid, user_data in self.users.items():
             if user_data["email"] == email:
-                return {
-                    "uid": uid,
-                    "email": email,
-                    "id_token": f"mock_id_token_{uid}",
-                    "refresh_token": f"mock_refresh_token_{uid}",
-                    "verified": user_data.get("email_verified", False)
-                }
+                # If password matches (or if password wasn't stored), allow authentication
+                stored_password = user_data.get("password")
+                if stored_password is None or stored_password == password:
+                    return {
+                        "uid": uid,
+                        "email": email,
+                        "id_token": f"mock_id_token_{uid}",
+                        "refresh_token": f"mock_refresh_token_{uid}",
+                        "verified": user_data.get("email_verified", True)
+                    }
         return None
     
     async def get_user_by_email(self, email: str) -> dict:
@@ -202,9 +206,8 @@ def test_app(
             with patch('bruno_ai_server.services.firebase_service.firebase_service', mock_firebase_service_integration):
                 # Also patch any other places where firebase_service might be imported
                 with patch('bruno_ai_server.routes.auth.firebase_service', mock_firebase_service_integration):
-                    with patch('bruno_ai_server.middleware.auth_middleware.firebase_service', mock_firebase_service_integration):
-                        client = TestClient(app)
-                        yield client
+                    client = TestClient(app)
+                    yield client
     
     # Clean up dependency overrides after test
     app.dependency_overrides.clear()
@@ -228,10 +231,6 @@ async def clean_database(db_session: AsyncSession):
     # Any cleanup logic can go here if needed
 
 
-# Integration test markers
-pytest_plugins = [
-    "pytest_asyncio",
-]
 
 
 def pytest_configure(config):

@@ -70,12 +70,13 @@ def validate_email_format(email: str) -> bool:
     return True
 
 
-def validate_password_strength(password: str) -> PasswordValidationResult:
+def validate_password_strength(password: str, min_length: int = 8) -> PasswordValidationResult:
     """
     Validate password strength with comprehensive checks.
     
     Args:
         password: Password to validate
+        min_length: Minimum password length (default 8, frontend uses 6)
         
     Returns:
         PasswordValidationResult: Validation result with score and errors
@@ -90,11 +91,15 @@ def validate_password_strength(password: str) -> PasswordValidationResult:
     errors = []
     strength_score = 0
     
-    # Length requirements
-    if len(password) < 8:
-        errors.append("Password must be at least 8 characters long")
-    elif len(password) >= 8:
-        strength_score += 20
+    # Length requirements - flexible minimum
+    if len(password) < min_length:
+        errors.append(f"Password must be at least {min_length} characters long")
+    elif len(password) >= min_length:
+        # Base score for meeting minimum length
+        strength_score += 15
+        # Additional score for longer passwords
+        if len(password) >= 8:
+            strength_score += 10
         if len(password) >= 12:
             strength_score += 10
         if len(password) >= 16:
@@ -159,7 +164,7 @@ def validate_password_strength(password: str) -> PasswordValidationResult:
         strength_score = 0
     
     # Minimum requirements for validity
-    min_requirements_met = len(errors) == 0 and len(password) >= 8
+    min_requirements_met = len(errors) == 0 and len(password) >= min_length
     
     return PasswordValidationResult(
         is_valid=min_requirements_met,

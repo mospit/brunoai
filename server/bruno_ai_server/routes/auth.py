@@ -7,6 +7,7 @@ import string
 from datetime import timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from fastapi.responses import RedirectResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -26,6 +27,7 @@ from ..schemas import (
     HouseholdCreate,
     HouseholdResponse,
     RefreshTokenRequest,
+    RegistrationToken,
     Token,
     UserCreate,
     UserLogin,
@@ -40,7 +42,7 @@ def generate_invite_code() -> str:
     return ''.join(random.choices(string.digits, k=8))
 
 
-@router.post("/register", response_model=UserResponse)
+@router.post("/register", response_model=RegistrationToken, status_code=status.HTTP_201_CREATED)
 async def register_user(
     user_data: UserCreate,
     db: AsyncSession = Depends(get_async_session),
@@ -127,8 +129,24 @@ async def register_user(
 
     db.add(member)
     await db.commit()
+    
+    # Create tokens for the new user
+    access_token_expires = timedelta(minutes=15)
+    access_token = create_access_token(
+        data={"sub": str(db_user.id)}, expires_delta=access_token_expires
+    )
+    
+    refresh_token_expires = timedelta(days=7)
+    refresh_token = create_refresh_token(
+        data={"sub": str(db_user.id)}, expires_delta=refresh_token_expires
+    )
 
-    return db_user
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer",
+        "user": db_user
+    }
 
 
 @router.post("/login", response_model=Token)
@@ -386,3 +404,53 @@ async def join_household(
     await db.commit()
 
     return household
+
+
+# Backwards compatibility router for old /auth endpoints
+compat_router = APIRouter(prefix="/auth", tags=["authentication-legacy"], include_in_schema=False)
+
+
+@compat_router.post("/register")
+async def register_user_legacy(
+    user_data: UserCreate,
+    db: AsyncSession = Depends(get_async_session),
+):
+    """Legacy endpoint - redirects to /api/users/register."""
+    return await register_user(user_data, db)
+
+
+@compat_router.post("/login")
+async def login_user_legacy(
+    user_data: UserLogin,
+    request: Request,
+    response: Response,
+    db: AsyncSession = Depends(get_async_session),
+):
+    """Legacy endpoint - redirects to /api/users/login."""
+    return await login_user(user_data, request, response, db)
+
+
+@compat_router.post("/refresh")
+async def refresh_access_token_legacy(
+    token_data: RefreshTokenRequest,
+    db: AsyncSession = Depends(get_async_session),
+):
+    """Legacy endpoint - redirects to /api/users/refresh."""
+    return await refresh_access_token(token_data, db)
+
+
+@compat_router.get("/csrf-token")
+async def get_csrf_token_legacy(request: Request):
+    """Legacy endpoint - redirects to /api/users/csrf-token."""
+    return await get_csrf_token(request)
+
+
+@compat_router.post("/logout")
+async def logout_user_legacy(
+    request: Request,
+    response: Response,
+    current_user: User = Depends(get_current_active_user),
+    db: AsyncSession = Depends(get_async_session),
+):
+    """Legacy endpoint - redirects to /api/users/logout."""
+    return await logout_user(request, response, current_user, db)

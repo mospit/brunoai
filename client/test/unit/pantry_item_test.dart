@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import '../../lib/models/pantry_item.dart';
-import '../../lib/models/pantry_category.dart';
+import '../../lib/features/pantry/models/pantry_item.dart';
+import '../../lib/features/pantry/models/pantry_category.dart';
 
 void main() {
   group('PantryItem', () {

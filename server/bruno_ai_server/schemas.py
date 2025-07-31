@@ -6,7 +6,7 @@ from datetime import date, datetime
 from typing import Any, List, Dict, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, EmailStr, validator
+from pydantic import BaseModel, EmailStr, field_validator, ConfigDict
 
 
 # Authentication schemas
@@ -20,10 +20,37 @@ class UserCreate(UserBase):
     """Schema for user creation."""
     password: str
 
-    @validator('password')
+    @field_validator('password')
+    @classmethod
     def validate_password(cls, v):
-        if len(v) < 8:
-            raise ValueError('Password must be at least 8 characters long')
+        import re
+        
+        # Frontend compatibility validation (minimum requirements only)
+        errors = []
+        
+        # Length check - frontend requires minimum 6 characters
+        if len(v) < 6:
+            errors.append('Password must be at least 6 characters')
+        
+        # Character type requirements to match frontend exactly
+        has_lower = bool(re.search(r'[a-z]', v))
+        has_upper = bool(re.search(r'[A-Z]', v))
+        has_digit = bool(re.search(r'\d', v))
+        
+        if not (has_lower and has_upper and has_digit):
+            errors.append('Password must contain uppercase, lowercase, and number')
+        
+        # Basic length maximum for security
+        if len(v) > 128:
+            errors.append('Password is too long (maximum 128 characters)')
+        
+        # Only check for extremely obvious security issues (not special chars or patterns)
+        # This matches frontend behavior which only validates the basic requirements
+        
+        # Raise validation error if frontend requirements not met
+        if errors:
+            raise ValueError('; '.join(errors))
+        
         return v
 
 
@@ -44,8 +71,7 @@ class UserResponse(UserBase):
     notification_preferences: dict[str, Any] = {}
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class Token(BaseModel):
@@ -53,6 +79,11 @@ class Token(BaseModel):
     access_token: str
     refresh_token: str | None = None
     token_type: str = "bearer"
+
+
+class RegistrationToken(Token):
+    """Schema for JWT token response with user data (for registration)."""
+    user: UserResponse
 
 
 class TokenData(BaseModel):
@@ -84,8 +115,7 @@ class HouseholdResponse(HouseholdBase):
     settings: dict[str, Any] = {}
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class HouseholdMemberResponse(BaseModel):
@@ -97,8 +127,7 @@ class HouseholdMemberResponse(BaseModel):
     joined_at: datetime
     user: UserResponse
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # Pantry schemas
@@ -110,8 +139,7 @@ class PantryCategoryResponse(BaseModel):
     icon: str | None = None
     color: str | None = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class PantryItemBase(BaseModel):
@@ -146,7 +174,8 @@ class PantryItemQuantityAdjustment(BaseModel):
     amount: float
     item_name: str | None = None  # For voice commands that specify item by name
     
-    @validator('amount')
+    @field_validator('amount')
+    @classmethod
     def validate_amount(cls, v):
         if v <= 0:
             raise ValueError('Amount must be positive')
@@ -158,7 +187,8 @@ class PantryItemSetQuantity(BaseModel):
     quantity: float
     item_name: str | None = None  # For voice commands that specify item by name
     
-    @validator('quantity')
+    @field_validator('quantity')
+    @classmethod
     def validate_quantity(cls, v):
         if v < 0:
             raise ValueError('Quantity cannot be negative')
@@ -181,8 +211,7 @@ class PantryItemResponse(PantryItemBase):
     category: PantryCategoryResponse | None = None
     added_by_user: UserResponse
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # Voice processing schemas
@@ -252,7 +281,8 @@ class TTSSynthesisRequest(BaseModel):
     ssml: bool = False
     optimize_for_kitchen: bool = True
     
-    @validator('text')
+    @field_validator('text')
+    @classmethod
     def validate_text(cls, v):
         if not v.strip():
             raise ValueError('Text cannot be empty')
@@ -260,13 +290,15 @@ class TTSSynthesisRequest(BaseModel):
             raise ValueError('Text too long (max 5000 characters)')
         return v
     
-    @validator('speed')
+    @field_validator('speed')
+    @classmethod
     def validate_speed(cls, v):
         if not 0.25 <= v <= 4.0:
             raise ValueError('Speed must be between 0.25 and 4.0')
         return v
     
-    @validator('pitch')
+    @field_validator('pitch')
+    @classmethod
     def validate_pitch(cls, v):
         if not -20.0 <= v <= 20.0:
             raise ValueError('Pitch must be between -20.0 and 20.0')
@@ -337,5 +369,4 @@ class RecipeResponse(RecipeBase):
     external_id: str | None = None
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

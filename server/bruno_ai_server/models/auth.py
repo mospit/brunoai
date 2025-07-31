@@ -13,10 +13,11 @@ from sqlalchemy import (
     String,
     CheckConstraint,
 )
-from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from .base import Base, TimestampMixin
+from .types import CompatibleJSONB
 
 
 class RefreshToken(Base, TimestampMixin):
@@ -28,7 +29,7 @@ class RefreshToken(Base, TimestampMixin):
     token = Column(String(500), unique=True, index=True, nullable=False)
     expires_at = Column(DateTime(timezone=True), nullable=False)
     is_revoked = Column(Boolean, default=False, nullable=False)
-    device_info = Column(JSONB, default=dict)
+    device_info = Column(CompatibleJSONB, default=dict)
 
     # Relationships
     user = relationship("User", back_populates="refresh_tokens")

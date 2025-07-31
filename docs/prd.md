@@ -91,9 +91,9 @@ Frontend: Flutter for cross-platform mobile development
 
 Backend: Python with FastAPI, PostgreSQL database with SQLAlchemy ORM  
 
-AI/ML: CrewAI for cutting-edge multi-agent system orchestration (selected as top 2025 framework for coordinating autonomous agents in collaborative workflows; supports sequential, hierarchical, and bi-directional coordination); RouteLLM for cost-optimized LLM routing (e.g., routing simple queries to GPT-4.1-mini and complex ones to GPT-4.1, using 'mf' router with calibrated thresholds); Mem0 for universal memory layer (storing user preferences, session states, and agent history for personalized interactions); OpenAI GPT-4.1 (strong model) and GPT-4.1-mini (weak model) for agent intelligence and meal suggestions  
+AI/ML: CrewAI for cutting-edge multi-agent system orchestration (selected as top 2025 framework for coordinating autonomous agents in collaborative workflows; supports sequential, hierarchical, and bi-directional coordination); RouteLLM for cost-optimized LLM routing (e.g., routing simple queries to Qwen 3 32B and complex ones to Qwen 3 235B, using 'mf' router with calibrated thresholds); Mem0 for universal memory layer (storing user preferences, session states, and agent history for personalized interactions); OpenRouter as the AI provider, with Cerebras models Qwen 3 235B (strong model) and Qwen 3 32B (weak model) for agent intelligence and meal suggestions. The free tier will use Llama 3.1 8B.  
 
-Voice: Mistral's Voxtral API for STT (speech-to-text) with multilingual support and 95%+ accuracy on food terms; TTS (text-to-speech) provider TBD for speak feature to enable Bruno to verbally respond; integrated via Flutter packages like speech_to_text and flutter_tts  
+Voice: For the free tier, STT will be handled by the Flutter frontend. For the paid tier, STT will be provided by Mistral's Voxtral Small 24b. For Text-to-Speech (TTS), Resemble AI's chatterbox will be used to generate responses with a custom Bruno voice.  
 
 Real-time: FastAPI WebSockets for household synchronization  
 
@@ -121,15 +121,15 @@ Core Entities:
 Framework: CrewAI (top open-source framework in 2025 for multi-agent collaboration, enabling agents to plan, act, and learn autonomously with reinforcement learning integration). Agents use hierarchical coordination for task decomposition, bi-directional communication for real-time adaptation, and human-in-the-loop oversight for critical decisions.  
 
 Key Agents and Roles:  
-- Orchestrator Agent: Central coordinator; routes user queries, manages task decomposition, resolves conflicts using reinforcement learning for optimization. Powered by GPT-4.1 for complex reasoning.  
-- Pantry Agent: Tracks inventory, sets expirations, sends warnings; queries database and uses Mem0 for user-specific recall (e.g., preferred categories). Routed to GPT-4.1-mini for simple updates.  
-- Meal Agent: Analyzes pantry data, user preferences via Mem0; generates recipe suggestions, filters diets using vector-aware embeddings for similarity matching. Uses GPT-4.1 for strategic reasoning in suggestions.  
-- Shopping Agent: Builds lists from meal gaps; integrates Instacart API for orders, applies budget constraints. Routed to GPT-4.1-mini for list generation, GPT-4.1 for negotiation-like pricing checks.  
-- Voice Agent: Processes speech inputs via Voxtral; converts to text, handles noise with edge computing for low-latency; triggers TTS responses. Uses GPT-4.1-mini for parsing.  
-- Collaboration Agent: Syncs household data in real-time via WebSockets; manages permissions, edits with conflict resolution algorithms. Routed to GPT-4.1-mini.  
+- Orchestrator Agent: Central coordinator; routes user queries, manages task decomposition, resolves conflicts using reinforcement learning for optimization. Powered by Qwen 3 235B for complex reasoning.  
+- Pantry Agent: Tracks inventory, sets expirations, sends warnings; queries database and uses Mem0 for user-specific recall (e.g., preferred categories). Routed to Qwen 3 32B for simple updates.  
+- Meal Agent: Analyzes pantry data, user preferences via Mem0; generates recipe suggestions, filters diets using vector-aware embeddings for similarity matching. Uses Qwen 3 235B for strategic reasoning in suggestions.  
+- Shopping Agent: Builds lists from meal gaps; integrates Instacart API for orders, applies budget constraints. Routed to Qwen 3 32B for list generation, Qwen 3 235B for negotiation-like pricing checks.  
+- Chat Agent: Processes text or speech inputs. For speech, it uses the appropriate STT service (Flutter for free, Mistral's Voxtral Small 24b for paid). For verbal responses, it triggers the 'speak' tool which integrates with Resemble AI's chatterbox to generate responses using the custom Bruno voice.  
+- Collaboration Agent: Syncs household data in real-time via WebSockets; manages permissions, edits with conflict resolution algorithms. Routed to Qwen 3 32B.  
 
 Interactions and Workflows:  
-- User query (e.g., "Dinner ideas?") → Voice Agent parses → Orchestrator delegates to Pantry/Meal Agents in parallel → Meal Agent collaborates with Shopping Agent for missing items → Results synced via Collaboration Agent → TTS response.  
+- User query (e.g., "Dinner ideas?") → Chat Agent parses → Orchestrator delegates to Pantry/Meal Agents in parallel → Meal Agent collaborates with Shopping Agent for missing items → Results synced via Collaboration Agent → TTS response.  
 - Hierarchical Flow: Orchestrator breaks tasks into subtasks; agents execute sequentially or bi-directionally (e.g., Meal Agent queries Pantry Agent back for updates).  
 - Adaptation: Agents learn from interactions via Mem0's multi-level memory (short-term session, long-term user prefs); reinforcement learning optimizes routing.  
 - Challenges Mitigation: Agent malfunctions handled by error boundaries in CrewAI; coordination complexity via predefined protocols; scalability with GCP auto-scaling; security through encrypted inter-agent communication.  
@@ -182,7 +182,10 @@ Primary: Affiliate Partnerships (Launch Year)
 Secondary: Premium Features (Year 2)  
 - Advanced meal planning and nutrition tracking  
 - Premium recipe collections and cooking classes  
-- Target price: $4.99/month per household  
+- Target price: $4.99/month per household
+
+Free Plan Limitations:
+- Only the Chat Agent (powered by Llama 3.1 8B) and TTS capabilities will be available on the free plan, with limited daily interactions. STT on the free plan is provided by the client-side Flutter application.  
 
 8.2 Unit Economics  
 Customer Acquisition Cost (CAC) = $15  
@@ -193,7 +196,7 @@ CLV/CAC Ratio = 6.4 (Target: >3.0)
 9. Risk Assessment and Mitigation  
 Risk | Impact | Probability | Mitigation Strategy  
 ---|---|---|---  
-Voice recognition accuracy below 90% | High | Medium | Implement text fallback, extensive voice training dataset  
+Voice recognition accuracy below 90% (especially for free tier Flutter STT) | High | Medium | Implement text fallback, extensive voice training dataset, and clear communication to users about the benefits of the premium STT service.  
 Low user adoption of voice features | High | Medium | Traditional UI as primary, voice as enhancement  
 Grocery API integration failures (e.g., Instacart) | Medium | Low | Multiple partner integrations (e.g., fallback to Amazon Fresh), thorough testing of Instacart API  
 Competition from established players | Medium | High | Focus on unique value proposition, rapid iteration  
@@ -215,8 +218,8 @@ Phase 4: Voice | 6 weeks | Voice integration (STT + TTS speak feature), hands-fr
 Phase 5: Launch Prep | 6 weeks | Testing, optimization, app store submission, Instacart integration testing | Production-ready application with Instacart ordering flow  
 
 10.2 Critical Path Dependencies  
-- OpenAI API access and rate limits (for GPT-4.1 and GPT-4.1-mini)  
-- Mistral Voxtral API for STT integration  
+- OpenRouter API access and rate limits (for Qwen 3 235B, Qwen 3 32B and Llama 3.1 8B)  
+- Mistral Voxtral API for paid-tier STT integration  
 - TTS provider selection and integration (TBD)  
 - App Store approval process  
 - Grocery partner API agreements (including Instacart Developer Platform access)  
@@ -239,8 +242,8 @@ Total Development Cost: $558K
 
 11.2 Infrastructure Costs  
 GCP hosting (Cloud SQL, Storage, Functions): $2K/month  
-OpenAI API usage (GPT-4.1 + GPT-4.1-mini via RouteLLM): $500/month (scaling with users; optimized for cost reduction)  
-Mistral Voxtral API (STT): $300/month  
+OpenRouter API usage (Qwen 3 235B, Qwen 3 32B and Llama 3.1 8B via RouteLLM): $500/month (scaling with users; optimized for cost reduction)  
+Mistral Voxtral API (STT for paid users): $300/month (estimated, scales with paid user base)  
 TTS provider (TBD): $300/month (estimated)  
 Mem0 hosted service (if used): $100/month (estimated)  
 Third-party integrations (including Instacart API): $200/month  
@@ -323,7 +326,7 @@ Epic 1: Pantry Management
 - As a user, I want to see my pantry organized by category so I can find items quickly  
 - As a user, I want to track quantities so I know when I'm running low on staples  
 
-Epic 2: Voice Interaction  
+Epic 2: Chat Interaction  
 - As a busy parent, I want to ask Bruno what's in my pantry while cooking so I don't need to stop and check my phone  
 - As a user, I want to add items by voice so I can update my pantry while unpacking groceries  
 - As a user, I want Bruno to understand common cooking terms and measurements so conversations feel natural  

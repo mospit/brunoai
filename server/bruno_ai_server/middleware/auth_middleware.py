@@ -113,19 +113,39 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
             "/redoc",
             "/openapi.json",
             "/health",
-            "/users/register",
-            "/users/login",
-            "/users/refresh",
-            "/users/verify-email",
-            "/users/request-password-reset",
-            "/users/reset-password"
+            "/",  # root endpoint
+            "/api/users/register",
+            "/api/users/login",
+            "/api/users/refresh",
+            "/api/users/verify-email",
+            "/api/users/request-password-reset",
+            "/api/users/reset-password",
+            "/api/users/csrf-token",
+            # Legacy paths for backwards compatibility
+            "/api/auth/register",
+            "/api/auth/login",
+            "/api/auth/refresh",
+            "/api/auth/csrf-token",
+            # Client-side paths (without /api prefix) - for compatibility
+            "/auth/register",
+            "/auth/login",
+            "/auth/refresh",
+            "/auth/csrf-token"
         }
         
         # Paths with special rate limits
         self.auth_paths = {
-            "/users/login",
-            "/users/refresh",
-            "/users/register"
+            "/api/users/login",
+            "/api/users/refresh",
+            "/api/users/register",
+            # Legacy paths for backwards compatibility
+            "/api/auth/login",
+            "/api/auth/refresh",
+            "/api/auth/register",
+            # Direct auth paths (without /api prefix) - for compatibility
+            "/auth/login",
+            "/auth/refresh",
+            "/auth/register"
         }
     
     async def dispatch(self, request: Request, call_next):
@@ -194,13 +214,28 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
     
     def _is_public_path(self, path: str) -> bool:
         """Check if path is public (doesn't require authentication)."""
+        # Normalize path by stripping trailing slash (except for root)
+        normalized_path = path.rstrip('/') if path != '/' else path
+        
         # Check exact matches
-        if path in self.public_paths:
+        if normalized_path in self.public_paths:
+            return True
+        
+        # Check path with trailing slash for flexibility (in case public_paths contains trailing slashes)
+        if path != normalized_path and path in self.public_paths:
             return True
         
         # Check prefixes for documentation paths
+        # We need to ensure the prefix match is a proper directory boundary
         public_prefixes = ["/docs", "/redoc", "/static"]
-        return any(path.startswith(prefix) for prefix in public_prefixes)
+        for prefix in public_prefixes:
+            # Path starts with prefix AND either:
+            # 1. Path is exactly the prefix
+            # 2. Path starts with prefix followed by '/' (proper directory boundary)
+            if normalized_path == prefix or normalized_path.startswith(prefix + "/"):
+                return True
+        
+        return False
     
     def _get_client_ip(self, request: Request) -> str:
         """Get client IP address from request."""

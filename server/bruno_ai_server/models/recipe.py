@@ -11,10 +11,11 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
 )
-from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from .base import Base, TimestampMixin
+from .types import CompatibleJSONB
 
 
 class Recipe(Base, TimestampMixin):
@@ -33,10 +34,10 @@ class Recipe(Base, TimestampMixin):
     difficulty_level = Column(String(20))  # easy, medium, hard
 
     # Nutrition information stored as JSON
-    nutrition_info = Column(JSONB, default=dict)
+    nutrition_info = Column(CompatibleJSONB, default=dict)
 
     # Recipe tags and categories
-    tags = Column(JSONB, default=list)  # ["vegetarian", "quick", "healthy"]
+    tags = Column(CompatibleJSONB, default=list)  # ["vegetarian", "quick", "healthy"]
     cuisine_type = Column(String(100))
 
     # External references

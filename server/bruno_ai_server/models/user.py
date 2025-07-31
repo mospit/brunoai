@@ -13,10 +13,11 @@ from sqlalchemy import (
     String,
     UniqueConstraint,
 )
-from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from .base import Base, TimestampMixin
+from .types import CompatibleJSONB
 
 
 class User(Base, TimestampMixin):
@@ -31,15 +32,15 @@ class User(Base, TimestampMixin):
     is_verified = Column(Boolean, default=False, nullable=False)
 
     # User preferences stored as JSON
-    dietary_preferences = Column(JSONB, default=dict)
-    voice_settings = Column(JSONB, default=dict)
-    notification_preferences = Column(JSONB, default=dict)
+    dietary_preferences = Column(CompatibleJSONB, default=dict)
+    voice_settings = Column(CompatibleJSONB, default=dict)
+    notification_preferences = Column(CompatibleJSONB, default=dict)
 
     household_id = Column(UUID(as_uuid=True), ForeignKey("households.id"), nullable=True)
     
     # Relationships
     household_memberships = relationship("HouseholdMember", back_populates="user")
-    owned_households = relationship("Household", back_populates="admin_user")
+    owned_households = relationship("Household", back_populates="admin_user", foreign_keys="Household.admin_user_id")
     pantry_items = relationship("PantryItem", back_populates="added_by_user")
     favorite_recipes = relationship("UserFavorite", back_populates="user")
     refresh_tokens = relationship("RefreshToken", back_populates="user", cascade="all, delete-orphan")
@@ -61,10 +62,10 @@ class Household(Base, TimestampMixin):
     admin_user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
 
     # Household settings stored as JSON
-    settings = Column(JSONB, default=dict)
+    settings = Column(CompatibleJSONB, default=dict)
 
     # Relationships
-    admin_user = relationship("User", back_populates="owned_households")
+    admin_user = relationship("User", back_populates="owned_households", foreign_keys=[admin_user_id])
     members = relationship("HouseholdMember", back_populates="household")
     pantry_items = relationship("PantryItem", back_populates="household")
 

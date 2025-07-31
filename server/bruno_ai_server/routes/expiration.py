@@ -3,7 +3,7 @@ Expiration management API routes for Bruno AI.
 """
 
 from datetime import date, datetime, timedelta
-from typing import Dict, List
+from typing import Any, Dict, List
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -19,7 +19,7 @@ from ..services.expiration_service import ExpirationService
 router = APIRouter(prefix="/expiration", tags=["expiration"])
 
 
-@router.get("/suggest", response_model=Dict[str, any])
+@router.get("/suggest", response_model=Dict[str, Any])
 async def suggest_expiration_date(
     item_name: str = Query(..., description="Name of the item"),
     category_name: str = Query(None, description="Category of the item"),
@@ -82,7 +82,7 @@ async def get_expired_items(
     return expired_items
 
 
-@router.get("/summary", response_model=Dict[str, any])
+@router.get("/summary", response_model=Dict[str, Any])
 async def get_expiration_summary(
     current_user: User = Depends(get_current_active_user),
     db: AsyncSession = Depends(get_async_session)
@@ -100,7 +100,7 @@ async def get_expiration_summary(
     return summary
 
 
-@router.get("/badge-info", response_model=Dict[str, any])
+@router.get("/badge-info", response_model=Dict[str, Any])
 async def get_expiration_badge_info(
     expiration_date: date = Query(..., description="Expiration date of the item")
 ):
@@ -114,7 +114,7 @@ async def get_expiration_badge_info(
     }
 
 
-@router.get("/alerts", response_model=Dict[str, any])
+@router.get("/alerts", response_model=Dict[str, Any])
 async def get_expiration_alerts(
     current_user: User = Depends(get_current_active_user),
     db: AsyncSession = Depends(get_async_session)
