@@ -6,8 +6,8 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'mocks.dart';
 
 // Import models and services to test
-import '../../lib/features/pantry/models/pantry_item.dart';
-import '../../lib/features/pantry/models/pantry_category.dart';
+import 'package:client/features/pantry/models/pantry_item.dart';
+import 'package:client/features/pantry/models/pantry_category.dart';
 
 /// Example test demonstrating how to use the generated mocks
 /// 

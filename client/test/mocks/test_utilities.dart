@@ -7,9 +7,9 @@ import 'package:http/http.dart' as http;
 import 'all_mocks.mocks.dart';
 
 // Import models
-import '../../lib/features/pantry/models/pantry_item.dart';
-import '../../lib/features/pantry/models/pantry_category.dart';
-import '../../lib/models/product.dart';
+import 'package:client/features/pantry/models/pantry_item.dart';
+import 'package:client/features/pantry/models/pantry_category.dart';
+import 'package:client/models/product.dart';
 
 /// Test utilities and helper functions for mocking and test setup
 class TestUtilities {
@@ -113,7 +113,32 @@ class TestUtilities {
         .thenThrow(exception);
   }
 
-  // Removed unused mock setup functions to avoid compilation issues
+  /// Setup mock PantryService with predefined return values
+  static void setupMockPantryService(
+    MockPantryService mockPantryService,
+    List<PantryItem> items,
+  ) {
+    when(mockPantryService.getPantryItems())
+        .thenAnswer((_) async => items);
+  }
+
+  /// Setup mock CategoryService with predefined return values
+  static void setupMockCategoryService(
+    MockCategoryService mockCategoryService,
+    List<PantryCategory> categories,
+  ) {
+    when(mockCategoryService.getCategories())
+        .thenAnswer((_) async => categories);
+  }
+
+  /// Setup mock OfflineStorageService with predefined return values
+  static void setupMockOfflineStorage(
+    MockOfflineStorageService mockOfflineStorage,
+    List<PantryItem> items,
+  ) {
+    when(mockOfflineStorage.getAllPantryItems())
+        .thenAnswer((_) async => items);
+  }
 
   /// Create a list of sample pantry items for testing
   static List<PantryItem> createSamplePantryItems({int count = 3}) {

@@ -9,12 +9,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  mobile_scanner: ^5.0.0
+  # mobile_scanner: ^5.0.0  # Temporarily disabled due to compilation issues
   http: ^1.1.0
   provider: ^6.1.0
   permission_handler: ^11.3.0
-  speech_to_text: ^6.3.0
-  flutter_tts: ^3.8.5
+  # speech_to_text: ^6.6.0  # Temporarily disabled due to compilation issues
+  # flutter_tts: ^4.2.0  # Temporarily disabled due to compilation issues
   web_socket_channel: ^2.4.0
   uuid: ^4.1.0
   sqflite: ^2.3.0
